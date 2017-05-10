@@ -5,6 +5,8 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
 	"strconv"
+	"github.com/docker/libentitlement/parser"
+	"strings"
 )
 
 // Int entitlement's enforcement callback should take the security context to update with the constraints and
@@ -13,33 +15,30 @@ type IntEntitlementEnforceCallback func(*context.Context, int64) (*context.Conte
 
 // Int entitlements are entitlements with an explicit int value
 type IntEntitlement struct {
-	domain           string
+	domain           []string
 	id               string
 	value            []int64
 	enforce_callback IntEntitlementEnforceCallback
 }
 
-// FIXME: implement regexp that matches domain-name.id=[numeric-value]
-func intEntitlementParser(fullName string) (domain, id string, value int64, err error) {
-	return domain, id, value, err
-}
-
 func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) *IntEntitlement {
-	domain, id, value, err := intEntitlementParser(fullName)
+	domain, id, value, err := parser.ParseIntEntitlement(fullName)
 	if err != nil {
 		logrus.Errorf("Couldn't not create int entitlement for %v\n", fullName)
 		return nil
 	}
 
+	// FIXME: Add entitlement domain and the identifier to it
+
 	valueRef := make([]int64, 1)
-	valueRef[0] = value
+	valueRef[0] = int64(value)
 
 	return &IntEntitlement{domain: domain, id: id, value: valueRef, enforce_callback: callback}
 }
 
-// Domain() returns the entitlement's domain name
+// Domain() returns the entitlement's domain name as a string
 func (e *IntEntitlement) Domain() (string, error) {
-	if e.domain == "" {
+	if len(e.domain) == 0 {
 		id, err := e.Identifier()
 		if err != nil {
 			return "", fmt.Errorf("No domain or id found for current entitlement")
@@ -48,7 +47,7 @@ func (e *IntEntitlement) Domain() (string, error) {
 		return "", fmt.Errorf("No domain found for entitlement %s", id)
 	}
 
-	return e.domain, nil
+	return strings.Join(e.domain, "."), nil
 }
 
 // Identifier() returns the entitlement's identifier

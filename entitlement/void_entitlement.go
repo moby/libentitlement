@@ -4,23 +4,20 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
+	"github.com/docker/libentitlement/parser"
+	"strings"
 )
 
 type VoidEntitlementEnforceCallback func(*context.Context) (*context.Context, error)
 
 type VoidEntitlement struct {
-	domain           string
+	domain           []string
 	id               string
 	enforce_callback VoidEntitlementEnforceCallback
 }
 
-// FIXME: implement regexp that matches: [domain-name].[id]
-func voidEntitlementParser(fullName string) (domain, id string, err error) {
-	return domain, id, err
-}
-
 func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback) *VoidEntitlement {
-	domain, id, err := voidEntitlementParser(fullName)
+	domain, id, err := parser.ParseVoidEntitlement(fullName)
 	if err != nil {
 		logrus.Errorf("Couldn't not create entitlement for %v\n", fullName)
 		return nil
@@ -30,7 +27,7 @@ func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback
 }
 
 func (e *VoidEntitlement) Domain() (string, error) {
-	if e.domain == "" {
+	if len(e.domain) < 1 {
 		id, err := e.Identifier()
 		if err != nil {
 			return "", fmt.Errorf("No domain or id found for current entitlement")
@@ -39,7 +36,7 @@ func (e *VoidEntitlement) Domain() (string, error) {
 		return "", fmt.Errorf("No domain found for entitlement %s", id)
 	}
 
-	return e.domain, nil
+	return strings.Join(e.domain, "."), nil
 }
 
 func (e *VoidEntitlement) Identifier() (string, error) {

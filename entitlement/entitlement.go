@@ -4,11 +4,14 @@ import (
 	"github.com/docker/libentitlement/context"
 )
 
-// FIXME: we should have several types of entitlements & a hierarchy in domain
+// FIXME: we should have a hierarchy in domains
 // names (domain name system style implementation)
 // ex:
 // "Void entitlements": host.device.viewer
 // "String array entitlements": (can hold single/multiple string/int values)
+
+// FIXME: create error objects
+
 type Entitlement interface {
 	// Entitlement's domain name (ex: network, host.devices,
 	Domain() (string, error)

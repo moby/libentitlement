@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
+	"github.com/docker/libentitlement/parser"
+	"strings"
 )
 
 // String entitlement's enforcement callback should take the security context to update with the constraints and
@@ -12,30 +14,27 @@ type StringEntitlementEnforceCallback func(*context.Context, string) (*context.C
 
 // String entitlements are entitlements with an explicit string value
 type StringEntitlement struct {
-	domain           string
+	domain           []string
 	id               string
 	value            string
 	enforce_callback StringEntitlementEnforceCallback
 }
 
-// FIXME: implement regexp that matches domain-name.id=[stringvalue]
-func stringEntitlementParser(fullName string) (domain, id, value string, err error) {
-	return domain, id, value, err
-}
-
 func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCallback) *StringEntitlement {
-	domain, id, value, err := stringEntitlementParser(fullName)
+	domain, id, value, err := parser.ParseStringEntitlement(fullName)
 	if err != nil {
 		logrus.Errorf("Couldn't not create string entitlement for %v\n", fullName)
 		return nil
 	}
+
+	// FIXME: Add entitlement domain and the identifier to it
 
 	return &StringEntitlement{domain: domain, id: id, value: value, enforce_callback: callback}
 }
 
 // Domain() returns the entitlement's domain name
 func (e *StringEntitlement) Domain() (string, error) {
-	if e.domain == "" {
+	if len(e.domain) < 1  {
 		id, err := e.Identifier()
 		if err != nil {
 			return "", fmt.Errorf("No domain or id found for current entitlement")
@@ -44,7 +43,7 @@ func (e *StringEntitlement) Domain() (string, error) {
 		return "", fmt.Errorf("No domain found for entitlement %s", id)
 	}
 
-	return e.domain, nil
+	return strings.Join(e.domain, "."), nil
 }
 
 // Identifier() returns the entitlement's identifier

@@ -103,7 +103,7 @@ func isEqual(ent1, ent2 entitlement.Entitlement) (bool, error) {
 // HasEntitlement() returns wether the given entitlement is registered in the current entitlements list
 func (m *EntitlementsManager) HasEntitlement(ent entitlement.Entitlement) (bool, error) {
 	if isValid, err := isValidEntitlement(ent); isValid == false {
-		return false, fmt.Errorf("Couldn't validate invalid entitlement: %v", err)
+		return false, fmt.Errorf("Couldn't check  invalid entitlement: %v", err)
 	}
 
 	for _, currEnt := range m.entitlementList {
