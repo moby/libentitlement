@@ -1,16 +1,16 @@
 package entitlement
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
-	"fmt"
 )
 
 type VoidEntitlementEnforceCallback func(*context.Context) (*context.Context, error)
 
 type VoidEntitlement struct {
-	domain string
-	id string
+	domain           string
+	id               string
 	enforce_callback VoidEntitlementEnforceCallback
 }
 
@@ -26,7 +26,7 @@ func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback
 		return nil
 	}
 
-	return &VoidEntitlement{domain:domain, id:id, enforce_callback:callback}
+	return &VoidEntitlement{domain: domain, id: id, enforce_callback: callback}
 }
 
 func (e *VoidEntitlement) Domain() (string, error) {

@@ -1,9 +1,9 @@
 package entitlement
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
-	"fmt"
 )
 
 // String entitlement's enforcement callback should take the security context to update with the constraints and
@@ -12,9 +12,9 @@ type StringEntitlementEnforceCallback func(*context.Context, string) (*context.C
 
 // String entitlements are entitlements with an explicit string value
 type StringEntitlement struct {
-	domain string
-	id string
-	value string
+	domain           string
+	id               string
+	value            string
 	enforce_callback StringEntitlementEnforceCallback
 }
 
@@ -30,7 +30,7 @@ func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCall
 		return nil
 	}
 
-	return &StringEntitlement{domain: domain, id: id, value: value, enforce_callback:callback}
+	return &StringEntitlement{domain: domain, id: id, value: value, enforce_callback: callback}
 }
 
 // Domain() returns the entitlement's domain name
@@ -60,7 +60,7 @@ func (e *StringEntitlement) Identifier() (string, error) {
 // Note: String entitlements need an explicit value, it can't be an empty string
 func (e *StringEntitlement) Value() (string, error) {
 	if e.value == "" {
-		id, _  := e.Identifier()
+		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return "", fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
 	}
@@ -77,7 +77,7 @@ func (e *StringEntitlement) Enforce(ctx *context.Context) (*context.Context, err
 	}
 
 	if e.enforce_callback == nil {
-		id, _  := e.Identifier()
+		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
@@ -89,6 +89,3 @@ func (e *StringEntitlement) Enforce(ctx *context.Context) (*context.Context, err
 
 	return newContext, err
 }
-
-
-

@@ -1,19 +1,25 @@
 package libentitlement
 
 import (
-	"github.com/docker/libentitlement/entitlement"
-	"github.com/docker/libentitlement/context"
 	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/docker/libentitlement/context"
+	"github.com/docker/libentitlement/entitlement"
 )
 
 type EntitlementsManager struct {
-	context *context.Context
+	context         *context.Context
 	entitlementList []entitlement.Entitlement
 }
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given context
 // default
-func NewEntitlementsManager(ctx *context.Context) (*EntitlementsManager) {
+func NewEntitlementsManager(ctx *context.Context) *EntitlementsManager {
+	if ctx == nil {
+		logrus.Errorf("EntilementsManager initialization: invalid security context - cannot be nil")
+		return nil
+	}
+
 	return &EntitlementsManager{context: ctx, entitlementList: make([]entitlement.Entitlement, 0)}
 }
 
@@ -135,6 +141,6 @@ func (m *EntitlementsManager) Enforce() error {
 }
 
 // GetContext() returns the current state of the security context
-func (m *EntitlementsManager) GetContext() (*context.Context) {
+func (m *EntitlementsManager) GetContext() *context.Context {
 	return m.context
 }

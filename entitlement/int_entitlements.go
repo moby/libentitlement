@@ -1,9 +1,9 @@
 package entitlement
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
-	"fmt"
 	"strconv"
 )
 
@@ -13,9 +13,9 @@ type IntEntitlementEnforceCallback func(*context.Context, int64) (*context.Conte
 
 // Int entitlements are entitlements with an explicit int value
 type IntEntitlement struct {
-	domain string
-	id string
-	value []int64
+	domain           string
+	id               string
+	value            []int64
 	enforce_callback IntEntitlementEnforceCallback
 }
 
@@ -34,7 +34,7 @@ func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) 
 	valueRef := make([]int64, 1)
 	valueRef[0] = value
 
-	return &IntEntitlement{domain: domain, id: id, value: valueRef, enforce_callback:callback}
+	return &IntEntitlement{domain: domain, id: id, value: valueRef, enforce_callback: callback}
 }
 
 // Domain() returns the entitlement's domain name
@@ -64,7 +64,7 @@ func (e *IntEntitlement) Identifier() (string, error) {
 // Note: Int entitlements need an explicit value, it can't be an empty string
 func (e *IntEntitlement) Value() (string, error) {
 	if e.value == nil || len(e.value) == 0 {
-		id, _  := e.Identifier()
+		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return "", fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
 	}
@@ -78,13 +78,13 @@ func (e *IntEntitlement) Value() (string, error) {
 // based on the entitlement int value
 func (e *IntEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
 	if e.value == nil || len(e.value) == 0 {
-		id, _  := e.Identifier()
+		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return ctx, fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
 	}
 
 	if e.enforce_callback == nil {
-		id, _  := e.Identifier()
+		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return ctx, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
@@ -96,6 +96,3 @@ func (e *IntEntitlement) Enforce(ctx *context.Context) (*context.Context, error)
 
 	return newContext, err
 }
-
-
-
