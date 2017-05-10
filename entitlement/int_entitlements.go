@@ -9,7 +9,7 @@ import (
 
 // Int entitlement's enforcement callback should take the security context to update with the constraints and
 // the entitlement int value as a parameter when being executed
-type IntEntitlementEnforceCallback func(context.Context, int64) (context.Context, error)
+type IntEntitlementEnforceCallback func(*context.Context, int64) (*context.Context, error)
 
 // Int entitlements are entitlements with an explicit int value
 type IntEntitlement struct {
@@ -40,7 +40,12 @@ func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) 
 // Domain() returns the entitlement's domain name
 func (e *IntEntitlement) Domain() (string, error) {
 	if e.domain == "" {
-		return nil, fmt.Errorf("No domain found for entitlement %s", e.Identifier())
+		id, err := e.Identifier()
+		if err != nil {
+			return "", fmt.Errorf("No domain or id found for current entitlement")
+		}
+
+		return "", fmt.Errorf("No domain found for entitlement %s", id)
 	}
 
 	return e.domain, nil
@@ -49,7 +54,7 @@ func (e *IntEntitlement) Domain() (string, error) {
 // Identifier() returns the entitlement's identifier
 func (e *IntEntitlement) Identifier() (string, error) {
 	if e.id == "" {
-		return nil, fmt.Errorf("No identifier found for current entitlement")
+		return "", fmt.Errorf("No identifier found for current entitlement")
 	}
 
 	return e.id, nil
@@ -61,7 +66,7 @@ func (e *IntEntitlement) Value() (string, error) {
 	if e.value == nil || len(e.value) == 0 {
 		id, _  := e.Identifier()
 		domain, _ := e.Domain()
-		return nil, fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
+		return "", fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
 	}
 
 	strValue := strconv.FormatInt(int64(e.value[1]), 10)
@@ -71,22 +76,22 @@ func (e *IntEntitlement) Value() (string, error) {
 
 // Enforce() calls the enforcement callback which applies the constraints on the security context
 // based on the entitlement int value
-func (e *IntEntitlement) Enforce(ctx context.Context) (context.Context, error) {
+func (e *IntEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
 	if e.value == nil || len(e.value) == 0 {
 		id, _  := e.Identifier()
 		domain, _ := e.Domain()
-		return nil, fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
+		return ctx, fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
 	}
 
 	if e.enforce_callback == nil {
 		id, _  := e.Identifier()
 		domain, _ := e.Domain()
-		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
+		return ctx, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
 	newContext, err := e.enforce_callback(ctx, e.value[1])
 	if err != nil {
-		return nil, err
+		return ctx, err
 	}
 
 	return newContext, err

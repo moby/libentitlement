@@ -18,5 +18,5 @@ type Entitlement interface {
 	Value() (string, error)
 	// Enforce should return an updated value of the context according to
 	// the entitlement spec (FIXME: write a proper entitlement spec and link it in the proposal)
-	Enforce(context.Context) (context.Context, error)
+	Enforce(*context.Context) (*context.Context, error)
 }

@@ -4,17 +4,16 @@ import (
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/context"
 	"fmt"
-	"reflect"
 )
 
 type EntitlementsManager struct {
-	context context.Context
+	context *context.Context
 	entitlementList []entitlement.Entitlement
 }
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given context
 // default
-func NewEntitlementsManager(ctx context.Context) (*EntitlementsManager) {
+func NewEntitlementsManager(ctx *context.Context) (*EntitlementsManager) {
 	return &EntitlementsManager{context: ctx, entitlementList: make([]entitlement.Entitlement, 0)}
 }
 
@@ -39,6 +38,10 @@ func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
 
 // Add() adds the given entitlements to the current entitlements list and enforce them
 func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error {
+	if m.context == nil {
+		return fmt.Errorf("Couldn't add to invalid security context")
+	}
+
 	for _, ent := range entitlements {
 		if isValid, err := isValidEntitlement(ent); isValid == false {
 			return fmt.Errorf("Couldn't add invalid entitlement: %v", err)
@@ -57,15 +60,54 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 	return nil
 }
 
+func isEqual(ent1, ent2 entitlement.Entitlement) (bool, error) {
+	id1, err := ent1.Identifier()
+	if err != nil {
+		return false, err
+	}
+
+	dom1, err := ent1.Domain()
+	if err != nil {
+		return false, err
+	}
+
+	val1, err := ent1.Value()
+	if err != nil {
+		return false, err
+	}
+
+	id2, err := ent2.Identifier()
+	if err != nil {
+		return false, err
+	}
+
+	dom2, err := ent2.Domain()
+	if err != nil {
+		return false, err
+	}
+
+	val2, err := ent2.Value()
+	if err != nil {
+		return false, err
+	}
+
+	return id1 == id2 && dom1 == dom2 && val1 == val2, nil
+}
+
 // HasEntitlement() returns wether the given entitlement is registered in the current entitlements list
 func (m *EntitlementsManager) HasEntitlement(ent entitlement.Entitlement) (bool, error) {
 	if isValid, err := isValidEntitlement(ent); isValid == false {
 		return false, fmt.Errorf("Couldn't validate invalid entitlement: %v", err)
 	}
 
-	for _, currEnts := range m.entitlementList {
-		// FIXME: we should not check equality on the function callbacks, only the type, domain, id and value
-		if reflect.DeepEqual(currEnts, entitlement) {
+	for _, currEnt := range m.entitlementList {
+		// Only compare entitlements id, domain and value
+		entEqual, err := isEqual(currEnt, ent)
+		if err != nil {
+			return false, err
+		}
+
+		if entEqual == true {
 			return true, nil
 		}
 	}
@@ -93,6 +135,6 @@ func (m *EntitlementsManager) Enforce() error {
 }
 
 // GetContext() returns the current state of the security context
-func (m *EntitlementsManager) GetContext() (context.Context) {
+func (m *EntitlementsManager) GetContext() (*context.Context) {
 	return m.context
 }

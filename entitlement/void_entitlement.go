@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-type VoidEntitlementEnforceCallback func(context.Context) (context.Context, error)
+type VoidEntitlementEnforceCallback func(*context.Context) (*context.Context, error)
 
 type VoidEntitlement struct {
 	domain string
@@ -31,7 +31,12 @@ func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback
 
 func (e *VoidEntitlement) Domain() (string, error) {
 	if e.domain == "" {
-		return nil, fmt.Errorf("No domain found for entitlement %s", e.Identifier())
+		id, err := e.Identifier()
+		if err != nil {
+			return "", fmt.Errorf("No domain or id found for current entitlement")
+		}
+
+		return "", fmt.Errorf("No domain found for entitlement %s", id)
 	}
 
 	return e.domain, nil
@@ -39,7 +44,7 @@ func (e *VoidEntitlement) Domain() (string, error) {
 
 func (e *VoidEntitlement) Identifier() (string, error) {
 	if e.id == "" {
-		return nil, fmt.Errorf("No identifier found for current entitlement")
+		return "", fmt.Errorf("No identifier found for current entitlement")
 	}
 
 	return e.id, nil
@@ -50,7 +55,7 @@ func (e *VoidEntitlement) Value() (string, error) {
 	return "", nil
 }
 
-func (e *VoidEntitlement) Enforce(ctx context.Context) (context.Context, error) {
+func (e *VoidEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 
