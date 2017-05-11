@@ -3,12 +3,12 @@ package entitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/context"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/docker/libentitlement/parser"
 	"strings"
 )
 
-type VoidEntitlementEnforceCallback func(*context.Context) (*context.Context, error)
+type VoidEntitlementEnforceCallback func(*secprofile.Profile) (*secprofile.Profile, error)
 
 type VoidEntitlement struct {
 	domain           []string
@@ -52,7 +52,7 @@ func (e *VoidEntitlement) Value() (string, error) {
 	return "", nil
 }
 
-func (e *VoidEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
+func (e *VoidEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 
@@ -60,10 +60,10 @@ func (e *VoidEntitlement) Enforce(ctx *context.Context) (*context.Context, error
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newContext, err := e.enforce_callback(ctx)
+	newProfile, err := e.enforce_callback(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return newContext, err
+	return newProfile, err
 }

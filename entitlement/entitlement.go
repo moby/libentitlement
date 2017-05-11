@@ -1,7 +1,7 @@
 package entitlement
 
 import (
-	"github.com/docker/libentitlement/context"
+	secprofile "github.com/docker/libentitlement/security-profile"
 )
 
 // FIXME: we should have a hierarchy in domains
@@ -19,7 +19,7 @@ type Entitlement interface {
 	Identifier() (string, error)
 	// Entitlement value (eg. resources) - optional
 	Value() (string, error)
-	// Enforce should return an updated value of the context according to
+	// Enforce should return an updated value of the profile according to
 	// the entitlement spec (FIXME: write a proper entitlement spec and link it in the proposal)
-	Enforce(*context.Context) (*context.Context, error)
+	Enforce(*secprofile.Profile) (*secprofile.Profile, error)
 }

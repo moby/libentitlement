@@ -20,31 +20,31 @@ the following types:
 Entitlements can be initialize with two parameters:
 - `fullName`: a string with the following format `domain-name.identifier[=argument]`
 - `callback`: a entitlement enforcement callback that takes the following arguments:
-  - a security context with `context.Context` type (for now it's an OCI specs struct)
+  - a security profile with `security-profile.Profile` type (for now it's an OCI specs struct)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
 ## Example
 A quick example on how to use entitlements in your container manager:
 ```golang
-/* 'context.Context' type is an OCI specs config struct for now
+/* 'context.Profile' type is an OCI specs config struct for now
  * We'll add abstract API access management in it. This is the security
- * context to modify in your entitlement.
- * You should provide your own initialized context to the entitlement manager.
+ * profile to modify in your entitlement.
+ * You should provide your own initialized profile to the entitlement manager.
  */
-ctx := context.NewContext()
+ctx := context.NewProfile()
 
 /* Initialize an entitlement manager which manages entitlements and provide them with
- * an updated security context
+ * an updated security profile
  */
 entMgr := NewEntitlementsManager(ctx)
 
 /* This is where you implement your entitlements.
  * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
- * capability to a security context.
+ * capability to a security profile.
  */
-capSysAdminEntCallback := func (ctx *entContext.Context) (*entContext.Context, error) {
+capSysAdminEntCallback := func (ctx *secProfile.Profile) (*secProfile.Profile, error) {
 	if ctx == nil {
-		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - context is nil.")
+		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
 	}
 	capToAdd := "CAP_SYS_ADMIN"
 

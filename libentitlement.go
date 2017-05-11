@@ -3,36 +3,36 @@ package libentitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/context"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/domain"
 	"strings"
+	secprofile "github.com/docker/libentitlement/security-profile"
 )
 
 type EntitlementsManager struct {
-	context         *context.Context
+	profile         *secprofile.Profile
 	entitlementList []entitlement.Entitlement
 	domainManager *domainmanager.DomainManager
 }
 
-// NewEntitlementsManager() instantiates an EntitlementsManager object with the given context
+// NewEntitlementsManager() instantiates an EntitlementsManager object with the given profile
 // default
-func NewEntitlementsManager(ctx *context.Context) *EntitlementsManager {
+func NewEntitlementsManager(ctx *secprofile.Profile) *EntitlementsManager {
 	if ctx == nil {
-		logrus.Errorf("EntilementsManager initialization: invalid security context - cannot be nil")
+		logrus.Errorf("EntilementsManager initialization: invalid security profile - cannot be nil")
 		return nil
 	}
 
 	return &EntitlementsManager{
-		context: ctx,
+		profile: ctx,
 		entitlementList: make([]entitlement.Entitlement, 0),
 		domainManager: domainmanager.NewDomainManager(),
 	}
 }
 
-// GetContext() returns the current state of the security context
-func (m *EntitlementsManager) GetContext() *context.Context {
-	return m.context
+// GetProfile() returns the current state of the security profile
+func (m *EntitlementsManager) GetProfile() *secprofile.Profile {
+	return m.profile
 }
 
 func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
@@ -57,8 +57,8 @@ func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
 // Add() adds the given entitlements to the current entitlements list, updates the domain name system and enforce
 // the entitlement on the security profile
 func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error {
-	if m.context == nil {
-		return fmt.Errorf("Couldn't add to invalid security context")
+	if m.profile == nil {
+		return fmt.Errorf("Couldn't add to invalid security profile")
 	}
 
 	for _, ent := range entitlements {
@@ -66,7 +66,7 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 			return fmt.Errorf("Couldn't add invalid entitlement: %v", err)
 		}
 
-		ctx, err := ent.Enforce(m.context)
+		ctx, err := ent.Enforce(m.profile)
 		if err != nil {
 			return err
 		}
@@ -78,11 +78,11 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 		err = m.domainManager.AddFullDomainWithEntitlementId(domainList, identifier)
 		if err != nil {
 			// Should not happen since we verified isValidEntitlement
-			// FIXME: we should probably revert the changes on the security context
+			// FIXME: we should probably revert the changes on the security profile
 			return err
 		}
 
-		m.context = ctx
+		m.profile = ctx
 
 		m.entitlementList = append(m.entitlementList, ent)
 	}
@@ -145,20 +145,20 @@ func (m *EntitlementsManager) HasEntitlement(ent entitlement.Entitlement) (bool,
 	return false, nil
 }
 
-// Enforce() applies the constraints on the security context and updates it to be used for the container
+// Enforce() applies the constraints on the security profile and updates it to be used for the container
 func (m *EntitlementsManager) Enforce() error {
 	for _, ent := range m.entitlementList {
 		if isValid, err := isValidEntitlement(ent); isValid == false {
 			return fmt.Errorf("Couldn't enforce invalid entitlement: %v", err)
 		}
 
-		// Try to enforce the entitlement on the security context
-		newContext, err := ent.Enforce(m.GetContext())
+		// Try to enforce the entitlement on the security profile
+		newProfile, err := ent.Enforce(m.GetProfile())
 		if err != nil {
 			return err
 		}
 
-		m.context = newContext
+		m.profile = newProfile
 	}
 
 	return nil

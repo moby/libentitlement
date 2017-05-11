@@ -3,14 +3,14 @@ package entitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/context"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/docker/libentitlement/parser"
 	"strings"
 )
 
-// String entitlement's enforcement callback should take the security context to update with the constraints and
+// String entitlement's enforcement callback should take the security profile to update with the constraints and
 // the entitlement value as a parameter when being executed
-type StringEntitlementEnforceCallback func(*context.Context, string) (*context.Context, error)
+type StringEntitlementEnforceCallback func(*secprofile.Profile, string) (*secprofile.Profile, error)
 
 // String entitlements are entitlements with an explicit string value
 type StringEntitlement struct {
@@ -67,9 +67,9 @@ func (e *StringEntitlement) Value() (string, error) {
 	return e.value, nil
 }
 
-// Enforce() calls the enforcement callback which applies the constraints on the security context
+// Enforce() calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
-func (e *StringEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
+func (e *StringEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile, error) {
 	value, err := e.Value()
 	if err != nil {
 		return nil, err
@@ -81,10 +81,10 @@ func (e *StringEntitlement) Enforce(ctx *context.Context) (*context.Context, err
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newContext, err := e.enforce_callback(ctx, value)
+	newProfile, err := e.enforce_callback(ctx, value)
 	if err != nil {
 		return nil, err
 	}
 
-	return newContext, err
+	return newProfile, err
 }

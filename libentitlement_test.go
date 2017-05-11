@@ -2,7 +2,7 @@ package libentitlement
 
 import (
 	"testing"
-	entContext "github.com/docker/libentitlement/context"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
@@ -10,23 +10,23 @@ import (
 )
 
 func TestRegisterDummyEntitlement(t *testing.T) {
-	ctx := entContext.NewContext()
-	entMgr := NewEntitlementsManager(ctx)
+	profile := secprofile.NewProfile()
+	entMgr := NewEntitlementsManager(profile)
 
 	// Add a dummy "foo.bar.cap-sys-admin" void entitlement that adds CAP_SYS_ADMIN
-	capSysAdminVoidEntCallback := func (ctx *entContext.Context) (*entContext.Context, error) {
-		if ctx == nil {
-			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - context is nil.")
+	capSysAdminVoidEntCallback := func (profile *secprofile.Profile) (*secprofile.Profile, error) {
+		if profile == nil {
+			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
 		}
 		capToAdd := "CAP_SYS_ADMIN"
 
-		if ctx.Process == nil {
-			ctx.Process = &specs.Process{}
+		if profile.Process == nil {
+			profile.Process = &specs.Process{}
 		}
 
-		if ctx.Process.Capabilities == nil {
+		if profile.Process.Capabilities == nil {
 			caps := []string{capToAdd}
-			ctx.Process.Capabilities = &specs.LinuxCapabilities{
+			profile.Process.Capabilities = &specs.LinuxCapabilities{
 				Bounding: caps,
 				Effective: caps,
 				Permitted: caps,
@@ -34,13 +34,13 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 				Ambient: []string{},
 			}
 		} else {
-			ctx.Process.Capabilities.Bounding = append(ctx.Process.Capabilities.Bounding, capToAdd)
-			ctx.Process.Capabilities.Effective = append(ctx.Process.Capabilities.Effective, capToAdd)
-			ctx.Process.Capabilities.Permitted = append(ctx.Process.Capabilities.Permitted, capToAdd)
-			ctx.Process.Capabilities.Inheritable = append(ctx.Process.Capabilities.Inheritable, capToAdd)
+			profile.Process.Capabilities.Bounding = append(profile.Process.Capabilities.Bounding, capToAdd)
+			profile.Process.Capabilities.Effective = append(profile.Process.Capabilities.Effective, capToAdd)
+			profile.Process.Capabilities.Permitted = append(profile.Process.Capabilities.Permitted, capToAdd)
+			profile.Process.Capabilities.Inheritable = append(profile.Process.Capabilities.Inheritable, capToAdd)
 		}
 
-		return ctx, nil
+		return profile, nil
 	}
 
 	capSysAdminVoidEntFullName := "foo-bar.meh.cap-sys-admin"
@@ -50,8 +50,8 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 	err := entMgr.Add(capSysAdminVoidEnt)
 	require.NoError(t, err, "Entitlement %s should have been added and enforced", capSysAdminVoidEntFullName)
 
-	require.Contains(t, ctx.Process.Capabilities.Bounding, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, ctx.Process.Capabilities.Effective, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, ctx.Process.Capabilities.Permitted, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, ctx.Process.Capabilities.Inheritable, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.Process.Capabilities.Bounding, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.Process.Capabilities.Effective, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.Process.Capabilities.Permitted, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.Process.Capabilities.Inheritable, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
 }

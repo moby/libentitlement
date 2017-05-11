@@ -3,15 +3,15 @@ package entitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/context"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"strconv"
 	"github.com/docker/libentitlement/parser"
 	"strings"
 )
 
-// Int entitlement's enforcement callback should take the security context to update with the constraints and
+// Int entitlement's enforcement callback should take the security profile to update with the constraints and
 // the entitlement int value as a parameter when being executed
-type IntEntitlementEnforceCallback func(*context.Context, int64) (*context.Context, error)
+type IntEntitlementEnforceCallback func(*secprofile.Profile, int64) (*secprofile.Profile, error)
 
 // Int entitlements are entitlements with an explicit int value
 type IntEntitlement struct {
@@ -73,9 +73,9 @@ func (e *IntEntitlement) Value() (string, error) {
 	return strValue, nil
 }
 
-// Enforce() calls the enforcement callback which applies the constraints on the security context
+// Enforce() calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement int value
-func (e *IntEntitlement) Enforce(ctx *context.Context) (*context.Context, error) {
+func (e *IntEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile, error) {
 	if e.value == nil || len(e.value) == 0 {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
@@ -88,10 +88,10 @@ func (e *IntEntitlement) Enforce(ctx *context.Context) (*context.Context, error)
 		return ctx, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newContext, err := e.enforce_callback(ctx, e.value[1])
+	newProfile, err := e.enforce_callback(ctx, e.value[1])
 	if err != nil {
 		return ctx, err
 	}
 
-	return newContext, err
+	return newProfile, err
 }
