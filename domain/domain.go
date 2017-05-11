@@ -46,6 +46,7 @@ func NewDomainManager() *DomainManager {
 	return &DomainManager{domains: make(map[string]*Domain)}
 }
 
+// Add a complete subdomain "chain" to a TLD
 func addFullSubdomainWithEntitlementIdtoTLD(tld *Domain, fullSubdomain []string, entitlementId string) {
 	// Shouldn't happen, so do nothing
 	if len(fullSubdomain) < 1 || tld == nil {

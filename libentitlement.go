@@ -5,11 +5,14 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/context"
 	"github.com/docker/libentitlement/entitlement"
+	"github.com/docker/libentitlement/domain"
+	"strings"
 )
 
 type EntitlementsManager struct {
 	context         *context.Context
 	entitlementList []entitlement.Entitlement
+	domainManager *domainmanager.DomainManager
 }
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given context
@@ -20,7 +23,16 @@ func NewEntitlementsManager(ctx *context.Context) *EntitlementsManager {
 		return nil
 	}
 
-	return &EntitlementsManager{context: ctx, entitlementList: make([]entitlement.Entitlement, 0)}
+	return &EntitlementsManager{
+		context: ctx,
+		entitlementList: make([]entitlement.Entitlement, 0),
+		domainManager: domainmanager.NewDomainManager(),
+	}
+}
+
+// GetContext() returns the current state of the security context
+func (m *EntitlementsManager) GetContext() *context.Context {
+	return m.context
 }
 
 func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
@@ -42,7 +54,8 @@ func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
 	return true, nil
 }
 
-// Add() adds the given entitlements to the current entitlements list and enforce them
+// Add() adds the given entitlements to the current entitlements list, updates the domain name system and enforce
+// the entitlement on the security profile
 func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error {
 	if m.context == nil {
 		return fmt.Errorf("Couldn't add to invalid security context")
@@ -55,6 +68,17 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 
 		ctx, err := ent.Enforce(m.context)
 		if err != nil {
+			return err
+		}
+
+		identifier, _ := ent.Identifier()
+		domainString, _ := ent.Domain()
+		domainList := strings.Split(domainString, ".")
+
+		err = m.domainManager.AddFullDomainWithEntitlementId(domainList, identifier)
+		if err != nil {
+			// Should not happen since we verified isValidEntitlement
+			// FIXME: we should probably revert the changes on the security context
 			return err
 		}
 
@@ -138,9 +162,4 @@ func (m *EntitlementsManager) Enforce() error {
 	}
 
 	return nil
-}
-
-// GetContext() returns the current state of the security context
-func (m *EntitlementsManager) GetContext() *context.Context {
-	return m.context
 }

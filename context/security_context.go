@@ -8,3 +8,7 @@ import (
 // Fixme add api access settings for Engine / Swarm / K8s?
 // We should maintain container's relevant security context for both Linux and Windows.
 type Context specs.Spec
+
+func NewContext() *Context {
+	return &Context{}
+}
