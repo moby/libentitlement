@@ -5,6 +5,8 @@ proposal: https://github.com/moby/moby/issues/32801 but would also handle on the
 long term a broader scope of constraints on different containers management 
 platforms.
 
+### Design
+
 `libentitlement` is designed to be a library to manage containers
 security profiles. It provides a way to register specific grants that add or
 remove constraints on those profiles.
@@ -20,3 +22,70 @@ Entitlements can be initialize with two parameters:
 - `callback`: a entitlement enforcement callback that takes the following arguments:
   - a security context with `context.Context` type (for now it's an OCI specs struct)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
+
+## Example
+A quick example on how to use entitlements in your container manager:
+```golang
+/* 'context.Context' type is an OCI specs config struct for now
+ * We'll add abstract API access management in it. This is the security
+ * context to modify in your entitlement.
+ * You should provide your own initialized context to the entitlement manager.
+ */
+ctx := context.NewContext()
+
+/* Initialize an entitlement manager which manages entitlements and provide them with
+ * an updated security context
+ */
+entMgr := NewEntitlementsManager(ctx)
+
+/* This is where you implement your entitlements.
+ * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
+ * capability to a security context.
+ */
+capSysAdminEntCallback := func (ctx *entContext.Context) (*entContext.Context, error) {
+	if ctx == nil {
+		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - context is nil.")
+	}
+	capToAdd := "CAP_SYS_ADMIN"
+
+	if ctx.Process == nil {
+		ctx.Process = &specs.Process{}
+	}
+
+	if ctx.Process.Capabilities == nil {
+		caps := []string{capToAdd}
+		ctx.Process.Capabilities = &specs.LinuxCapabilities{
+			Bounding: caps,
+			Effective: caps,
+			Permitted: caps,
+			Inheritable: caps,
+			Ambient: []string{},
+		}
+	} else {
+		ctx.Process.Capabilities.Bounding = append(ctx.Process.Capabilities.Bounding, capToAdd)
+		ctx.Process.Capabilities.Effective = append(ctx.Process.Capabilities.Effective, capToAdd)
+		ctx.Process.Capabilities.Permitted = append(ctx.Process.Capabilities.Permitted, capToAdd)
+		ctx.Process.Capabilities.Inheritable = append(ctx.Process.Capabilities.Inheritable, capToAdd)
+	}
+
+	return ctx, nil
+}
+
+/* We can call our entitlement "cap-sys-admin" and have it under the "security.custom.caps" domain
+ * Note: "security.custom.caps.cap-sys-admin" is different from "foobar.cap-sys-admin" as they are
+ * in two different domains.
+ */
+capSysAdminEntFullName := "security.custom.cap-sys-admin"
+
+/* We create a void entitlement (no parameter) with the name and the callback */
+capSysAdminVoidEnt := entitlement.NewVoidEntitlement(capSysAdminEntFullName, capSysAdminEntCallback)
+
+/* Ask the entitlement manager to add it, entitlements are enforced when added */
+err := entMgr.Add(capSysAdminVoidEnt)
+```
+
+This is as simple as that.
+
+## Copyright and license
+
+Code and documentation copyright 2017 Docker, inc. - All rights reserved.
