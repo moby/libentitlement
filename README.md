@@ -20,41 +20,41 @@ the following types:
 Entitlements can be initialize with two parameters:
 - `fullName`: a string with the following format `domain-name.identifier[=argument]`
 - `callback`: a entitlement enforcement callback that takes the following arguments:
-  - a security profile with `security-profile.Profile` type (for now it's an OCI specs struct)
+  - a security profile with `security_profile.Profile` type (for now it's an OCI specs struct)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
 ## Example
 A quick example on how to use entitlements in your container manager:
 ```golang
-/* 'context.Profile' type is an OCI specs config struct for now
+/* 'security_profile.Profile' type is an OCI specs config struct for now
  * We'll add abstract API access management in it. This is the security
  * profile to modify in your entitlement.
  * You should provide your own initialized profile to the entitlement manager.
  */
-ctx := context.NewProfile()
+profile := security_profile.NewProfile()
 
 /* Initialize an entitlement manager which manages entitlements and provide them with
  * an updated security profile
  */
-entMgr := NewEntitlementsManager(ctx)
+entMgr := NewEntitlementsManager(profile)
 
 /* This is where you implement your entitlements.
  * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
  * capability to a security profile.
  */
-capSysAdminEntCallback := func (ctx *secProfile.Profile) (*secProfile.Profile, error) {
-	if ctx == nil {
+capSysAdminEntCallback := func (profile *secProfile.Profile) (*secProfile.Profile, error) {
+	if profile == nil {
 		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
 	}
 	capToAdd := "CAP_SYS_ADMIN"
 
-	if ctx.Process == nil {
-		ctx.Process = &specs.Process{}
+	if profile.Process == nil {
+		profile.Process = &specs.Process{}
 	}
 
-	if ctx.Process.Capabilities == nil {
+	if profile.Process.Capabilities == nil {
 		caps := []string{capToAdd}
-		ctx.Process.Capabilities = &specs.LinuxCapabilities{
+		profile.Process.Capabilities = &specs.LinuxCapabilities{
 			Bounding: caps,
 			Effective: caps,
 			Permitted: caps,
@@ -62,13 +62,13 @@ capSysAdminEntCallback := func (ctx *secProfile.Profile) (*secProfile.Profile, e
 			Ambient: []string{},
 		}
 	} else {
-		ctx.Process.Capabilities.Bounding = append(ctx.Process.Capabilities.Bounding, capToAdd)
-		ctx.Process.Capabilities.Effective = append(ctx.Process.Capabilities.Effective, capToAdd)
-		ctx.Process.Capabilities.Permitted = append(ctx.Process.Capabilities.Permitted, capToAdd)
-		ctx.Process.Capabilities.Inheritable = append(ctx.Process.Capabilities.Inheritable, capToAdd)
+		profile.Process.Capabilities.Bounding = append(profile.Process.Capabilities.Bounding, capToAdd)
+		profile.Process.Capabilities.Effective = append(profile.Process.Capabilities.Effective, capToAdd)
+		profile.Process.Capabilities.Permitted = append(profile.Process.Capabilities.Permitted, capToAdd)
+		profile.Process.Capabilities.Inheritable = append(profile.Process.Capabilities.Inheritable, capToAdd)
 	}
 
-	return ctx, nil
+	return profile, nil
 }
 
 /* We can call our entitlement "cap-sys-admin" and have it under the "security.custom.caps" domain
