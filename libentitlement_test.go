@@ -49,4 +49,9 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 
 	err := entMgr.Add(capSysAdminVoidEnt)
 	require.NoError(t, err, "Entitlement %s should have been added and enforced", capSysAdminVoidEntFullName)
+
+	require.Contains(t, ctx.Process.Capabilities.Bounding, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, ctx.Process.Capabilities.Effective, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, ctx.Process.Capabilities.Permitted, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, ctx.Process.Capabilities.Inheritable, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
 }
