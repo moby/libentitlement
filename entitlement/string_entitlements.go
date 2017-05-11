@@ -69,7 +69,7 @@ func (e *StringEntitlement) Value() (string, error) {
 
 // Enforce() calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
-func (e *StringEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *StringEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	value, err := e.Value()
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (e *StringEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profil
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforce_callback(ctx, value)
+	newProfile, err := e.enforce_callback(profile, value)
 	if err != nil {
 		return nil, err
 	}

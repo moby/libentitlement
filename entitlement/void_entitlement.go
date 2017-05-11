@@ -52,7 +52,7 @@ func (e *VoidEntitlement) Value() (string, error) {
 	return "", nil
 }
 
-func (e *VoidEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *VoidEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 
@@ -60,7 +60,7 @@ func (e *VoidEntitlement) Enforce(ctx *secprofile.Profile) (*secprofile.Profile,
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforce_callback(ctx)
+	newProfile, err := e.enforce_callback(profile)
 	if err != nil {
 		return nil, err
 	}

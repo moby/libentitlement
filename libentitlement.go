@@ -17,14 +17,14 @@ type EntitlementsManager struct {
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given profile
 // default
-func NewEntitlementsManager(ctx *secprofile.Profile) *EntitlementsManager {
-	if ctx == nil {
+func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
+	if profile == nil {
 		logrus.Errorf("EntilementsManager initialization: invalid security profile - cannot be nil")
 		return nil
 	}
 
 	return &EntitlementsManager{
-		profile: ctx,
+		profile: profile,
 		entitlementList: make([]entitlement.Entitlement, 0),
 		domainManager: domainmanager.NewDomainManager(),
 	}
@@ -66,7 +66,7 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 			return fmt.Errorf("Couldn't add invalid entitlement: %v", err)
 		}
 
-		ctx, err := ent.Enforce(m.profile)
+		profile, err := ent.Enforce(m.profile)
 		if err != nil {
 			return err
 		}
@@ -82,7 +82,7 @@ func (m *EntitlementsManager) Add(entitlements ...entitlement.Entitlement) error
 			return err
 		}
 
-		m.profile = ctx
+		m.profile = profile
 
 		m.entitlementList = append(m.entitlementList, ent)
 	}
