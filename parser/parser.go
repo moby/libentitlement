@@ -39,7 +39,7 @@ func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string,
 	}
 
 	id = stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 2]
+	domain = stringList[0:len(stringList) - 1]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")

@@ -20,6 +20,10 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 		}
 		capToAdd := "CAP_SYS_ADMIN"
 
+		if ctx.Process == nil {
+			ctx.Process = &specs.Process{}
+		}
+
 		if ctx.Process.Capabilities == nil {
 			caps := []string{capToAdd}
 			ctx.Process.Capabilities = &specs.LinuxCapabilities{
@@ -39,11 +43,10 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 		return ctx, nil
 	}
 
-	capSysAdminVoidEntFullName := "foo.bar.cap-sys-admin"
+	capSysAdminVoidEntFullName := "foo-bar.meh.cap-sys-admin"
 
 	capSysAdminVoidEnt := entitlement.NewVoidEntitlement(capSysAdminVoidEntFullName, capSysAdminVoidEntCallback)
 
 	err := entMgr.Add(capSysAdminVoidEnt)
 	require.NoError(t, err, "Entitlement %s should have been added and enforced", capSysAdminVoidEntFullName)
-
 }

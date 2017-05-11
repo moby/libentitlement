@@ -83,7 +83,7 @@ func (m *DomainManager) AddFullDomainWithEntitlementId(fulldomain []string, enti
 		return fmt.Errorf("Invalid domain - can't add entitlementId: %s", entitlementId)
 	}
 
-	if parser.IsValidDomainNameList(fulldomain) != false {
+	if parser.IsValidDomainNameList(fulldomain) == false {
 		return fmt.Errorf("Invalid domain name: %s", strings.Join(fulldomain, "."))
 	}
 
