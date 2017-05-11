@@ -7,13 +7,14 @@ import (
 
 var NetworkTLD = "network"
 
-/* No access to /proc/pid/net, /proc/sys/net, /sys/class/net
- * No caps: NET_ADMIN, NET_BIND_SERVICE, NET_RAW
- * Blocked syscalls:
+/* Implements "network.none" entitlement
+ * - No access to /proc/pid/net, /proc/sys/net, /sys/class/net
+ * - No caps: NET_ADMIN, NET_BIND_SERVICE, NET_RAW
+ * - Blocked syscalls:
  *     socket, socketpair, setsockopt, getsockopt, getsockname, getpeername, bind, listen, accept,
  *     accept4, connect, shutdown,recvfrom, recvmsg, sendto, sendmsg, sendmmsg, sethostname,
  *     setdomainname, bpf
- * Add network namespace
+ * - Add network namespace
  */
 func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "NET_BIND_SERVICE", "CAP_NET_RAW"}

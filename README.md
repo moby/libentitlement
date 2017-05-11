@@ -23,6 +23,11 @@ Entitlements can be initialize with two parameters:
   - a security profile with `security_profile.Profile` type (for now it's an OCI specs struct)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
+Default entitlements can be found in `defaults`.
+
+Currently implemented:
+- `network.none` as `defaults.NetworkNoneEntitlement`
+
 ## Example
 A quick example on how to use entitlements in your container manager:
 ```golang
@@ -85,6 +90,23 @@ err := entMgr.Add(capSysAdminVoidEnt)
 ```
 
 This is as simple as that.
+
+## What's left
+
+Missing entitlements:
+- `network.user`, `network.proxy`, `network.admin`
+- `host.devices.none`, `host.devices.view`, `host.devices.mount`
+- `host.processes.none`, `host.processes.view`, `host.processes.all`
+- `security.none`, `security.view`, `security.admin`, `security.unconfined`,
+  `security.fs-read-only`
+- `debug`
+
+- resources: TBD
+
+For Docker:
+- `engine.api`
+
+For Kubernetes: TBD
 
 ## Copyright and license
 
