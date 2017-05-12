@@ -111,6 +111,8 @@ This is as simple as that.
 
 ## What's left
 - Implement missing entitlements
+- Provide more helper functions to configure security profiles in
+  `security_profile` package
 - Provide abstract API access management
 
 ## Copyright and license

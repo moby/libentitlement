@@ -1,10 +1,11 @@
-package defaults
+package security_profile
 
 import (
-	secProfile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
 )
+
+// FIXME: Add error handling here if profile or subfields are not allocated */
 
 /* Add capability if not present to capability set */
 func addCapToList(capList []string, capToAdd string) []string {
@@ -18,7 +19,7 @@ func addCapToList(capList []string, capToAdd string) []string {
 }
 
 /* Add a list of capabilities if not present to all capability masks */
-func addCaps(profile *secProfile.Profile, capsToAdd ...string) {
+func AddCaps(profile *Profile, capsToAdd ...string) {
 	for _, cap := range capsToAdd {
 		profile.Process.Capabilities.Bounding = addCapToList(profile.Process.Capabilities.Bounding, cap)
 		profile.Process.Capabilities.Effective = addCapToList(profile.Process.Capabilities.Effective, cap)
@@ -41,7 +42,7 @@ func removeCapFromList(capList []string, capToRemove string) []string {
 }
 
 /* Remove a list of capabilities if present from all capability masks */
-func removeCaps(profile *secProfile.Profile, capsToRemove ...string) {
+func RemoveCaps(profile *Profile, capsToRemove ...string) {
 	for _, cap := range capsToRemove {
 		profile.Process.Capabilities.Bounding = removeCapFromList(profile.Process.Capabilities.Bounding, cap)
 		profile.Process.Capabilities.Effective = removeCapFromList(profile.Process.Capabilities.Effective, cap)
@@ -53,7 +54,7 @@ func removeCaps(profile *secProfile.Profile, capsToRemove ...string) {
 }
 
 /* Add a list of paths to the set of paths masked in the container if not present yet */
-func addMaskedPaths(profile *secProfile.Profile, pathsToMask ...string) {
+func AddMaskedPaths(profile *Profile, pathsToMask ...string) {
 	for _, dir := range pathsToMask {
 		exists := false
 		for _, paths := range profile.Linux.MaskedPaths {
@@ -70,7 +71,7 @@ func addMaskedPaths(profile *secProfile.Profile, pathsToMask ...string) {
 }
 
 /* Add a list of namespaces to the enabled namespaces */
-func addNamespaces(profile *secProfile.Profile, nsTypes ...specs.LinuxNamespaceType) {
+func AddNamespaces(profile *Profile, nsTypes ...specs.LinuxNamespaceType) {
 	for _, ns := range nsTypes {
 		exists := false
 		for _, namespace := range profile.Linux.Namespaces {
@@ -88,7 +89,7 @@ func addNamespaces(profile *secProfile.Profile, nsTypes ...specs.LinuxNamespaceT
 }
 
 /* Add seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present */
-func blockSyscallsWithArgs(profile *secProfile.Profile, syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
+func BlockSyscallsWithArgs(profile *Profile, syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
 	/* For each syscall to block we browse each syscall list of each Seccomp rule */
 	for syscallNameToBlock, syscallArgsToBlock := range syscallsWithArgsToBlock {
 		blocked := false
@@ -150,11 +151,11 @@ func blockSyscallsWithArgs(profile *secProfile.Profile, syscallsWithArgsToBlock 
 }
 
 /* Block a list of syscalls without specific arguments */
-func blockSyscalls(profile *secProfile.Profile, syscallsToBlock ...string) {
+func BlockSyscalls(profile *Profile, syscallsToBlock ...string) {
 	syscallsWithNoArgsToBlock := make(map[string][]specs.LinuxSeccompArg)
 	for _, syscallsToBlock := range syscallsToBlock {
 		syscallsWithNoArgsToBlock[syscallsToBlock] = []specs.LinuxSeccompArg{}
 	}
 
-	blockSyscallsWithArgs(profile, syscallsWithNoArgsToBlock)
+	BlockSyscallsWithArgs(profile, syscallsWithNoArgsToBlock)
 }

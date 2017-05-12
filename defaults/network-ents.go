@@ -28,20 +28,20 @@ const (
  */
 func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
-	removeCaps(profile, capsToRemove...)
+	secProfile.RemoveCaps(profile, capsToRemove...)
 
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
-	addMaskedPaths(profile, pathsToMask...)
+	secProfile.AddMaskedPaths(profile, pathsToMask...)
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	addNamespaces(profile, nsToAdd...)
+	secProfile.AddNamespaces(profile, nsToAdd...)
 
 	syscallsToBlock := []string{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername",
 		"bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "sendto",
 		"sendmsg", "sendmmsg", "sethostname",
 	}
-	blockSyscalls(profile, syscallsToBlock...)
+	secProfile.BlockSyscalls(profile, syscallsToBlock...)
 
 	return profile, nil
 }
@@ -54,15 +54,15 @@ func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
  */
 func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
-	removeCaps(profile, capsToRemove...)
+	secProfile.RemoveCaps(profile, capsToRemove...)
 
 	capsToAdd := []string{"CAP_NET_BROADCAST"}
-	addCaps(profile, capsToAdd...)
+	secProfile.AddCaps(profile, capsToAdd...)
 
 	syscallsToBlock := []string{
 		"sethostname", "setdomainname", "bpf",
 	}
-	blockSyscalls(profile, syscallsToBlock...)
+	secProfile.BlockSyscalls(profile, syscallsToBlock...)
 
 	syscallsWithArgsToBlock := map[string][]specs.LinuxSeccompArg{
 		"setsockopt": []specs.LinuxSeccompArg{
@@ -74,5 +74,5 @@ func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 			},
 		},
 	}
-	blockSyscallsWithArgs(profile, syscallsWithArgsToBlock)
+	secProfile.BlockSyscallsWithArgs(profile, syscallsWithArgsToBlock)
 }
