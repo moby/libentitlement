@@ -112,7 +112,7 @@ func ParseStringEntitlement(entitlementFormat string) (domain []string, id, valu
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: identifier must be alphanumeric and can contain '-'")
 	}
 
-	// FIXME: should we aadd constraints on the allowed characters in entitlement parameters and its check integrity?
+	// FIXME: should we add constraints on the allowed characters in entitlement parameters and check integrity?
 
 	return
 }

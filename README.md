@@ -39,7 +39,7 @@ Missing entitlements:
   `security.fs-read-only`
 - `debug`
 
-- resources: TBD
+- resources limits/constraints: TBD
 
 For Docker:
 - `engine.api`
@@ -52,9 +52,9 @@ A quick example on how to use entitlements in your container manager:
 /* 'security_profile.Profile' type is an OCI specs config struct for now
  * We'll add abstract API access management in it. This is the security
  * profile to modify in your entitlement.
- * You should provide your own initialized profile to the entitlement manager.
+ * You should provide your own initialized OCI config to the entitlement manager.
  */
-profile := security_profile.NewProfile()
+profile := security_profile.NewProfile(OCI_config)
 
 /* Initialize an entitlement manager which manages entitlements and provide them with
  * an updated security profile
@@ -69,27 +69,8 @@ capSysAdminEntCallback := func (profile *secProfile.Profile) (*secProfile.Profil
 	if profile == nil {
 		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
 	}
-	capToAdd := "CAP_SYS_ADMIN"
 
-	if profile.Process == nil {
-		profile.Process = &specs.Process{}
-	}
-
-	if profile.Process.Capabilities == nil {
-		caps := []string{capToAdd}
-		profile.Process.Capabilities = &specs.LinuxCapabilities{
-			Bounding: caps,
-			Effective: caps,
-			Permitted: caps,
-			Inheritable: caps,
-			Ambient: []string{},
-		}
-	} else {
-		profile.Process.Capabilities.Bounding = append(profile.Process.Capabilities.Bounding, capToAdd)
-		profile.Process.Capabilities.Effective = append(profile.Process.Capabilities.Effective, capToAdd)
-		profile.Process.Capabilities.Permitted = append(profile.Process.Capabilities.Permitted, capToAdd)
-		profile.Process.Capabilities.Inheritable = append(profile.Process.Capabilities.Inheritable, capToAdd)
-	}
+	profile.AddCaps("CAP_SYS_ADMIN")
 
 	return profile, nil
 }
@@ -110,7 +91,7 @@ err := entMgr.Add(capSysAdminVoidEnt)
 This is as simple as that.
 
 ## What's left
-- Implement missing entitlements
+- Implement missing default entitlements
 - Provide more helper functions to configure security profiles in
   `security_profile` package
 - Provide abstract API access management
