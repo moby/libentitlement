@@ -11,10 +11,10 @@ const (
 )
 
 const (
-	NetworkNoneEntId = "none"	// network.none
-	NetworkUserEntId = "user"	// network.user
-	NetworkProxyEntId = "proxy"	// network.proxy
-	NetworkAdminEntId = "admin"	// network.admin
+	NetworkNoneEntId  = "none"  // network.none
+	NetworkUserEntId  = "user"  // network.user
+	NetworkProxyEntId = "proxy" // network.proxy
+	NetworkAdminEntId = "admin" // network.admin
 )
 
 /* Implements "network.none" entitlement
@@ -29,7 +29,6 @@ const (
 func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
 	profile.RemoveCaps(capsToRemove...)
-
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
 	profile.AddMaskedPaths(pathsToMask...)

@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"strings"
 	"fmt"
-	"strconv"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 // FIXME: refactor shared code between each Parse[..]Entitlement functions
@@ -35,18 +35,18 @@ func IsValidIdentifier(identifier string) bool {
 func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
-		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: either domain or id missing")
+		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: either domain or id missing", entitlementFormat)
 	}
 
-	id = stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 1]
+	id = stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-1]
 
 	if IsValidDomainNameList(domain) == false {
-		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")
+		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator", entitlementFormat)
 	}
 
 	if IsValidIdentifier(id) == false {
-		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: identifier must be alphanumeric and can contain '-'")
+		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
 	}
 
 	return
@@ -56,31 +56,31 @@ func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string,
 func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, value int, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
-		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: either domain or id missing")
+		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: either domain or id missing", entitlementFormat)
 	}
 
-	idAndArgString := stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 2]
+	idAndArgString := stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-2]
 
 	if IsValidDomainNameList(domain) == false {
-		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")
+		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator", entitlementFormat)
 	}
 
 	idAndArgList := strings.Split(idAndArgString, "=")
 	if len(idAndArgList) != 2 {
-		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: format required 'domain-name.identifier=int-value'")
+		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: format required 'domain-name.identifier=int-value'", entitlementFormat)
 	}
 
 	id = idAndArgList[0]
 	valueString := idAndArgList[1]
 
 	if IsValidIdentifier(id) == false {
-		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: identifier must be alphanumeric and can contain '-'")
+		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
 	}
 
 	value, err = strconv.Atoi(valueString)
 	if err != nil {
-		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: entitlement argument must be a 64bits integer")
+		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: entitlement argument must be a 64bits integer", entitlementFormat)
 	}
 
 	return
@@ -90,26 +90,26 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 func ParseStringEntitlement(entitlementFormat string) (domain []string, id, value string, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
-		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: either domain or id missing")
+		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: either domain or id missing", entitlementFormat)
 	}
 
-	idAndArgString := stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 2]
+	idAndArgString := stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-2]
 
 	if IsValidDomainNameList(domain) == false {
-		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")
+		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator", entitlementFormat)
 	}
 
 	idAndArgList := strings.Split(idAndArgString, "=")
 	if len(idAndArgList) != 2 {
-		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: format required 'domain-name.identifier=param'")
+		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: format required 'domain-name.identifier=param'", entitlementFormat)
 	}
 
 	id = idAndArgList[0]
 	value = idAndArgList[1]
 
 	if IsValidIdentifier(id) == false {
-		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: identifier must be alphanumeric and can contain '-'")
+		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
 	}
 
 	// FIXME: should we add constraints on the allowed characters in entitlement parameters and check integrity?
