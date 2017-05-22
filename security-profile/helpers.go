@@ -21,3 +21,5 @@ func removeCapFromList(capList []string, capToRemove string) []string {
 
 	return capList
 }
+
+func addRuleToApparmorProfile()

@@ -30,9 +30,10 @@ Default entitlements can be found in `defaults`.
 Currently implemented:
 - `network.none` as `defaults.NetworkNoneEntitlement`
 - `network.user` as `defaults.NetworkUserEntitlement`
+- `network.proxy` as `defaults.NetworkProxyEntitlement`
+- `network.admin` as `defaults.NetworkAdminEntitlement`
 
 Missing entitlements:
-- `network.proxy`, `network.admin`
 - `host.devices.none`, `host.devices.view`, `host.devices.mount`
 - `host.processes.none`, `host.processes.view`, `host.processes.all`
 - `security.none`, `security.view`, `security.admin`, `security.unconfined`,

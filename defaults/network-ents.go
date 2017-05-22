@@ -43,6 +43,8 @@ func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 
+	// FIXME: build an Apparmor Profile if necessary + add `deny network`
+
 	return profile, nil
 }
 

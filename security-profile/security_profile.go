@@ -5,6 +5,12 @@ import (
 	"reflect"
 )
 
+type AppArmorProfile struct {
+	Rules []string
+}
+
+func (a *AppArmorProfile) AddDenyPathsRule()
+
 // Profile maintains some OCI spec settings but should also contain a complete security
 // context.
 // Profiles should be maintained for both Linux and Windows at any given time.
@@ -12,6 +18,7 @@ import (
 // Fixme add api access settings for Engine / Swarm / K8s?
 type Profile struct {
 	Oci *specs.Spec
+	AppArmor *AppArmorProfile
 }
 
 func NewProfile(ociSpec *specs.Spec) *Profile {
