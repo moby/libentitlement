@@ -9,8 +9,6 @@ type AppArmorProfile struct {
 	Rules []string
 }
 
-func (a *AppArmorProfile) AddDenyPathsRule()
-
 // Profile maintains some OCI spec settings but should also contain a complete security
 // context.
 // Profiles should be maintained for both Linux and Windows at any given time.
@@ -22,7 +20,7 @@ type Profile struct {
 }
 
 func NewProfile(ociSpec *specs.Spec) *Profile {
-	return &Profile{Oci:ociSpec}
+	return &Profile{Oci: ociSpec}
 }
 
 /* Add a list of capabilities if not present to all capability masks */
@@ -50,7 +48,6 @@ func (p *Profile) RemoveCaps(capsToRemove ...string) {
 		p.Oci.Process.Capabilities.Ambient = removeCapFromList(p.Oci.Process.Capabilities.Ambient, cap)
 	}
 }
-
 
 /* Add a list of paths to the set of paths masked in the container if not present yet */
 func (p *Profile) AddMaskedPaths(pathsToMask ...string) {
@@ -106,7 +103,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 						if len(p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names) == 1 {
 							p.Oci.Linux.Seccomp.Syscalls = append(
 								p.Oci.Linux.Seccomp.Syscalls[0:syscallRuleIndex],
-								p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex+1:]...
+								p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex+1:]...,
 							)
 
 							break
@@ -115,7 +112,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 						/* Otherwise, remove it from the rule */
 						p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names = append(
 							p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names[0:syscallNameIndex],
-							p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names[syscallNameIndex+1:]...
+							p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names[syscallNameIndex+1:]...,
 						)
 					}
 				}
@@ -139,9 +136,9 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 		/* If we don't find it in a blocking rule, we add one */
 		if !blocked {
 			newRule := specs.LinuxSyscall{
-				Names: []string{syscallNameToBlock},
+				Names:  []string{syscallNameToBlock},
 				Action: specs.ActErrno,
-				Args: syscallArgsToBlock,
+				Args:   syscallArgsToBlock,
 			}
 			p.Oci.Linux.Seccomp.Syscalls = append(p.Oci.Linux.Seccomp.Syscalls, newRule)
 		}

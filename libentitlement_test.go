@@ -1,34 +1,34 @@
 package libentitlement
 
 import (
-	"testing"
-	secprofile "github.com/docker/libentitlement/security-profile"
+	"fmt"
 	"github.com/docker/libentitlement/entitlement"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
-	"fmt"
+	"testing"
 )
 
 func testSpec() *specs.Spec {
 	s := &specs.Spec{
 		Process: &specs.Process{
 			Capabilities: &specs.LinuxCapabilities{
-				Bounding: []string{},
-				Effective: []string{},
+				Bounding:    []string{},
+				Effective:   []string{},
 				Inheritable: []string{},
-				Permitted: []string{},
-				Ambient: []string{},
+				Permitted:   []string{},
+				Ambient:     []string{},
 			},
 		},
 		Linux: &specs.Linux{
-			Seccomp: &specs.LinuxSeccomp{},
+			Seccomp:   &specs.LinuxSeccomp{},
 			Resources: &specs.LinuxResources{},
-			IntelRdt: &specs.LinuxIntelRdt{},
+			IntelRdt:  &specs.LinuxIntelRdt{},
 		},
 		Windows: &specs.Windows{
 			Resources: &specs.WindowsResources{
-				Memory: &specs.WindowsMemoryResources{},
-				CPU: &specs.WindowsCPUResources{},
+				Memory:  &specs.WindowsMemoryResources{},
+				CPU:     &specs.WindowsCPUResources{},
 				Storage: &specs.WindowsStorageResources{},
 				Network: &specs.WindowsNetworkResources{},
 			},
@@ -45,7 +45,7 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 	entMgr := NewEntitlementsManager(profile)
 
 	// Add a dummy "foo.bar.cap-sys-admin" void entitlement that adds CAP_SYS_ADMIN
-	capSysAdminVoidEntCallback := func (profile *secprofile.Profile) (*secprofile.Profile, error) {
+	capSysAdminVoidEntCallback := func(profile *secprofile.Profile) (*secprofile.Profile, error) {
 		if profile == nil {
 			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
 		}

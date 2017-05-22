@@ -1,15 +1,15 @@
 package domainmanager
 
 import (
-	"github.com/docker/libentitlement/parser"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/docker/libentitlement/parser"
 	"strings"
 )
 
 type Domain struct {
-	name string
-	subdomains map[string]*Domain
+	name           string
+	subdomains     map[string]*Domain
 	entitlementIds map[string]bool
 }
 
@@ -21,7 +21,7 @@ func NewDomain(name string) *Domain {
 	subdomainsMap := make(map[string]*Domain)
 	entitlementIdList := make(map[string]bool)
 
-	return &Domain{name:name, subdomains:subdomainsMap, entitlementIds:entitlementIdList}
+	return &Domain{name: name, subdomains: subdomainsMap, entitlementIds: entitlementIdList}
 }
 
 func (d *Domain) AddSubdomains(subdomains ...*Domain) {

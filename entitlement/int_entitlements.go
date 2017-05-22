@@ -3,9 +3,9 @@ package entitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/docker/libentitlement/parser"
 	secprofile "github.com/docker/libentitlement/security-profile"
 	"strconv"
-	"github.com/docker/libentitlement/parser"
 	"strings"
 )
 
