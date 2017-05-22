@@ -3,16 +3,16 @@ package libentitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/domain"
-	"strings"
+	"github.com/docker/libentitlement/entitlement"
 	secprofile "github.com/docker/libentitlement/security-profile"
+	"strings"
 )
 
 type EntitlementsManager struct {
 	profile         *secprofile.Profile
 	entitlementList []entitlement.Entitlement
-	domainManager *domainmanager.DomainManager
+	domainManager   *domainmanager.DomainManager
 }
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given profile
@@ -24,9 +24,9 @@ func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 	}
 
 	return &EntitlementsManager{
-		profile: profile,
+		profile:         profile,
 		entitlementList: make([]entitlement.Entitlement, 0),
-		domainManager: domainmanager.NewDomainManager(),
+		domainManager:   domainmanager.NewDomainManager(),
 	}
 }
 
