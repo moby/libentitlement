@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"strings"
 	"fmt"
-	"strconv"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 // FIXME: refactor shared code between each Parse[..]Entitlement functions
@@ -38,8 +38,8 @@ func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string,
 		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: either domain or id missing")
 	}
 
-	id = stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 1]
+	id = stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-1]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", fmt.Errorf("Parsing of entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")
@@ -59,8 +59,8 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: either domain or id missing")
 	}
 
-	idAndArgString := stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 2]
+	idAndArgString := stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-2]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")
@@ -93,8 +93,8 @@ func ParseStringEntitlement(entitlementFormat string) (domain []string, id, valu
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: either domain or id missing")
 	}
 
-	idAndArgString := stringList[len(stringList) - 1]
-	domain = stringList[0:len(stringList) - 2]
+	idAndArgString := stringList[len(stringList)-1]
+	domain = stringList[0 : len(stringList)-2]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator")

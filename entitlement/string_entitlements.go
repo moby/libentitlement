@@ -3,8 +3,8 @@ package entitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/docker/libentitlement/parser"
+	secprofile "github.com/docker/libentitlement/security-profile"
 	"strings"
 )
 
@@ -34,7 +34,7 @@ func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCall
 
 // Domain() returns the entitlement's domain name
 func (e *StringEntitlement) Domain() (string, error) {
-	if len(e.domain) < 1  {
+	if len(e.domain) < 1 {
 		id, err := e.Identifier()
 		if err != nil {
 			return "", fmt.Errorf("No domain or id found for current entitlement")
