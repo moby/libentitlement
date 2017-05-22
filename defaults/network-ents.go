@@ -74,6 +74,8 @@ func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 		},
 	}
 	profile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
+
+	return profile, nil
 }
 
 func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
@@ -94,9 +96,13 @@ func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, 
 		},
 	}
 	profile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
+
+	return profile, nil
 }
 
 func NetworkAdminEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
 	profile.AddCaps(capsToAdd...)
+  
+	return profile, nil
 }
