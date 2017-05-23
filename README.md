@@ -1,4 +1,5 @@
 # libentitlement
+[![CircleCI](https://circleci.com/gh/docker/libentitlement/tree/master.svg?style=shield&circle-token=31f311362a2690ebfbcbdd2d5ee0c56474a869e6)](https://circleci.com/gh/docker/libentitlement)
 
 `libentitlement` is currently WIP for a proof-of-concept that implements this
 proposal: https://github.com/moby/moby/issues/32801 but would also handle on the
