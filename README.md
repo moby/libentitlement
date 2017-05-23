@@ -1,8 +1,8 @@
 # libentitlement
 
-`libentitlement` is currently WIP for a proof-of-concept that implements this
-proposal: https://github.com/moby/moby/issues/32801 but would also handle on the
-long term a broader scope of constraints on different containers management 
+`libentitlement` is currently a WIP proof-of-concept that implements this
+proposal: https://github.com/moby/moby/issues/32801. Longer term, `libentitlement`
+will also handle a broader scope of constraints on different container management
 platforms.
 
 ### Design
@@ -57,13 +57,13 @@ A quick example on how to use entitlements in your container manager:
  */
 profile := security_profile.NewProfile(OCI_config)
 
-/* Initialize an entitlement manager which manages entitlements and provide them with
+/* Initialize an entitlement manager which manages entitlements and provide it with
  * an updated security profile
  */
 entMgr := NewEntitlementsManager(profile)
 
-/* This is where you implement your entitlements.
- * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
+/* This is where you implement your own custom entitlements.
+ * For example, we can initialize a new void entitlement callback which adds the "CAP_SYS_ADMIN"
  * capability to a security profile.
  */
 capSysAdminEntCallback := func (profile *secProfile.Profile) (*secProfile.Profile, error) {
@@ -89,7 +89,7 @@ capSysAdminVoidEnt := entitlement.NewVoidEntitlement(capSysAdminEntFullName, cap
 err := entMgr.Add(capSysAdminVoidEnt)
 ```
 
-This is as simple as that.
+It's as simple as that.
 
 ## What's left
 - Implement missing default entitlements
@@ -99,4 +99,4 @@ This is as simple as that.
 
 ## Copyright and license
 
-Code and documentation copyright 2017 Docker, inc. - All rights reserved.
+Code and documentation copyright 2017 Docker, Inc. - All rights reserved.
