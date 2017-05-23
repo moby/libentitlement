@@ -15,7 +15,7 @@ type AppArmorProfile struct {
 // FIXME: Add error handling here if profile or subfields are not allocated */
 // Fixme add api access settings for Engine / Swarm / K8s?
 type Profile struct {
-	Oci *specs.Spec
+	Oci      *specs.Spec
 	AppArmor *AppArmorProfile
 }
 
