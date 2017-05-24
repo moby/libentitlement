@@ -7,6 +7,5 @@ jobs:
     working_directory: $GOPATH/src/github.com/docker/libentitlement
     steps:
       - checkout
-      - run: cd $GOPATH/src/github.com/docker/libentitlement && test -z $(go tool vet -printf=false . 2>&1 | grep -v vendor/ | tee /dev/stderr)
-      - run: cd $GOPATH/src/github.com/docker/libentitlement && test -z $(gofmt -s -l . | grep -v vendor/ | tee /dev/stderr)
-      - run: cd $GOPATH/src/github.com/docker/libentitlement && go test .
+      - run: go get -u github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
+      - run: cd $GOPATH/src/github.com/docker/libentitlement && make test
