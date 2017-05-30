@@ -125,7 +125,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 
 						/* We'll keep looking in next rules outside of this loop as
 						 * SECCOMP_RET_TRAP has precedence over SECCOMP_RET_ERRNO for example
-						 * and we want to make sure we remove all those occurences
+						 * and we want to make sure we remove all those occurrences
 						 */
 						break
 					}
