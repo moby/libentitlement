@@ -1,13 +1,22 @@
 # libentitlement
 
 `libentitlement` is currently WIP for a proof-of-concept that implements this
-proposal: https://github.com/moby/moby/issues/32801 but would also handle on the
+[proposal](https://github.com/moby/moby/issues/32801) but would also handle on the
 long term a broader scope of constraints on different containers management 
 platforms.
 
+A detailed documentation about this proposal and its rationale can be found [here](https://docs.google.com/document/d/1j3BJUNBsgi-nxJHoIJHsXRRtVWT5lrwsI2EN9WMQaes/).
+
+### What is an entitlement?
+
+Entitlements enable or disable different security features in a configuration profile. The list of entitlements in a configuration profile specify the exact privilege and capabilities that a container is allowed to access.
+
+The entitlement manager should be the source of truth regarding security configuration.
+
+
 ### Design
 
-`libentitlement` is designed to be a library to manage containers
+`libentitlement` is designed to be a library managing container
 security profiles. It provides a way to register specific grants that add or
 remove constraints on those profiles.
 
@@ -23,31 +32,7 @@ Entitlements can be initialize with two parameters:
   - a security profile with `security_profile.Profile` type (for now it's an OCI specs struct)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
-
-## Default entitlements
-Default entitlements can be found in `defaults`.
-
-Currently implemented:
-- `network.none` as `defaults.NetworkNoneEntitlement`
-- `network.user` as `defaults.NetworkUserEntitlement`
-- `network.proxy` as `defaults.NetworkProxyEntitlement`
-- `network.admin` as `defaults.NetworkAdminEntitlement`
-
-Missing entitlements:
-- `host.devices.none`, `host.devices.view`, `host.devices.mount`
-- `host.processes.none`, `host.processes.view`, `host.processes.all`
-- `security.none`, `security.view`, `security.admin`, `security.unconfined`,
-  `security.fs-read-only`
-- `debug`
-
-- resources limits/constraints: TBD
-
-For Docker:
-- `engine.api`
-
-For Kubernetes: TBD
-
-## Example
+### Example
 A quick example on how to use entitlements in your container manager:
 ```golang
 /* 'security_profile.Profile' type is an OCI specs config struct for now
@@ -90,6 +75,29 @@ err := entMgr.Add(capSysAdminVoidEnt)
 ```
 
 This is as simple as that.
+
+### Default entitlements
+Default entitlements can be found in `defaults`. They implement the entitlements in the [proposal's table](https://github.com/moby/moby/issues/32801).
+
+Currently implemented:
+- `network.none` as `defaults.NetworkNoneEntitlement`
+- `network.user` as `defaults.NetworkUserEntitlement`
+- `network.proxy` as `defaults.NetworkProxyEntitlement`
+- `network.admin` as `defaults.NetworkAdminEntitlement`
+
+Missing entitlements:
+- `host.devices.none`, `host.devices.view`, `host.devices.mount`
+- `host.processes.none`, `host.processes.view`, `host.processes.all`
+- `security.none`, `security.view`, `security.admin`, `security.unconfined`,
+  `security.fs-read-only`
+- `debug`
+
+- resources limits/constraints: TBD
+
+For Docker:
+- `engine.api`
+
+For Kubernetes: TBD
 
 ## What's left
 - Implement missing default entitlements
