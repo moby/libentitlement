@@ -9,7 +9,7 @@ A detailed documentation about this proposal and its rationale can be found [her
 
 ### What is an entitlement?
 
-Entitlements enable or disable different security features in a configuration profile. Through a list of entitlements, a user specifies what it intends to do.
+Entitlements enable or disable different security features in a configuration profile. The list of entitlements in a configuration profile specify the exact privilege and capabilities that a container is allowed to access.
 
 The entitlement manager should be the source of truth regarding security configuration.
 
