@@ -100,3 +100,4 @@ This is as simple as that.
 ## Copyright and license
 
 Code and documentation copyright 2017 Docker, inc. - All rights reserved.
+
