@@ -11,7 +11,7 @@ import (
 
 func testSpec() *specs.Spec {
 	s := &specs.Spec{
-		Process: &specs.Process{
+		Process: specs.Process{
 			Capabilities: &specs.LinuxCapabilities{
 				Bounding:    []string{},
 				Effective:   []string{},
