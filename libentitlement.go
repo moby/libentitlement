@@ -178,7 +178,12 @@ func (m *EntitlementsManager) Enforce() error {
 		}
 
 		// Try to enforce the entitlement on the security profile
-		newProfile, err := ent.Enforce(m.GetProfile())
+		profile, err := m.GetProfile()
+		if err != nil {
+			return err
+		}
+
+		newProfile, err := ent.Enforce(profile)
 		if err != nil {
 			return err
 		}

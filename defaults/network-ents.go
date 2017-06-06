@@ -4,7 +4,6 @@ import (
 	"github.com/docker/libentitlement/entitlement"
 	secProfile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"strings"
 	"syscall"
 )
 
