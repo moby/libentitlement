@@ -3,6 +3,7 @@ package libentitlement
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/docker/libentitlement/defaults"
 	"github.com/docker/libentitlement/domain"
 	"github.com/docker/libentitlement/entitlement"
 	secprofile "github.com/docker/libentitlement/security-profile"
@@ -19,7 +20,7 @@ type EntitlementsManager struct {
 // default
 func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 	if profile == nil {
-		logrus.Errorf("EntilementsManager initialization: invalid security profile - cannot be nil")
+		logrus.Errorf("Entilements Manager initialization: invalid security profile - cannot be nil")
 		return nil
 	}
 
@@ -31,8 +32,22 @@ func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 }
 
 // GetProfile() returns the current state of the security profile
-func (m *EntitlementsManager) GetProfile() *secprofile.Profile {
-	return m.profile
+func (m *EntitlementsManager) GetProfile() (*secprofile.Profile, error) {
+	if m.profile == nil {
+		return nil, fmt.Errorf("Entitlements Manager has np security profile.")
+	}
+
+	return m.profile, nil
+}
+
+// SetProfile() sets the entitlement manager's security profile
+func (m *EntitlementsManager) SetProfile(profile *secprofile.Profile) error {
+	if profile == nil {
+		return fmt.Errorf("Invalid security profile")
+	}
+
+	m.profile = profile
+	return nil
 }
 
 func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
@@ -52,6 +67,16 @@ func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// AddDefault() adds a default entitlement identified by the "
+func (m *EntitlementsManager) AddDefault(entName string) error {
+	defaultEnt, ok := defaults.DefaultEntitlements[entName]
+	if !ok {
+		return fmt.Errorf("Couldn't add invalid default entitlement name")
+	}
+
+	return m.Add(defaultEnt)
 }
 
 // Add() adds the given entitlements to the current entitlements list, updates the domain name system and enforce
