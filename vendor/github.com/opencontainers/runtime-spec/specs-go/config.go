@@ -9,7 +9,7 @@ type Spec struct {
 	// Platform specifies the configuration's target platform.
 	Platform Platform `json:"platform"`
 	// Process configures the container process.
-	Process *Process `json:"process,omitempty"`
+	Process Process `json:"process"`
 	// Root configures the container's root filesystem.
 	Root Root `json:"root"`
 	// Hostname configures the container's hostname.
@@ -21,11 +21,11 @@ type Spec struct {
 	// Annotations contains arbitrary metadata for the container.
 	Annotations map[string]string `json:"annotations,omitempty"`
 
-	// Linux is platform-specific configuration for Linux based containers.
+	// Linux is platform specific configuration for Linux based containers.
 	Linux *Linux `json:"linux,omitempty" platform:"linux"`
-	// Solaris is platform-specific configuration for Solaris containers.
+	// Solaris is platform specific configuration for Solaris containers.
 	Solaris *Solaris `json:"solaris,omitempty" platform:"solaris"`
-	// Windows is platform-specific configuration for Windows based containers, including Hyper-V containers.
+	// Windows is platform specific configuration for Windows based containers, including Hyper-V containers.
 	Windows *Windows `json:"windows,omitempty" platform:"windows"`
 }
 
@@ -34,7 +34,7 @@ type Process struct {
 	// Terminal creates an interactive terminal for the container.
 	Terminal bool `json:"terminal,omitempty"`
 	// ConsoleSize specifies the size of the console.
-	ConsoleSize *Box `json:"consoleSize,omitempty"`
+	ConsoleSize Box `json:"consoleSize,omitempty"`
 	// User specifies user information for the process.
 	User User `json:"user"`
 	// Args specifies the binary and arguments for the application to execute.
@@ -52,8 +52,6 @@ type Process struct {
 	NoNewPrivileges bool `json:"noNewPrivileges,omitempty" platform:"linux"`
 	// ApparmorProfile specifies the apparmor profile for the container.
 	ApparmorProfile string `json:"apparmorProfile,omitempty" platform:"linux"`
-	// Specify an oom_score_adj for the container.
-	OOMScoreAdj *int `json:"oomScoreAdj,omitempty"`
 	// SelinuxLabel specifies the selinux context that the container process is run as.
 	SelinuxLabel string `json:"selinuxLabel,omitempty" platform:"linux"`
 }
@@ -142,7 +140,7 @@ type Hooks struct {
 	Poststop []Hook `json:"poststop,omitempty"`
 }
 
-// Linux contains platform-specific configuration for Linux based containers.
+// Linux contains platform specific configuration for Linux based containers.
 type Linux struct {
 	// UIDMapping specifies user mappings for supporting user namespaces on Linux.
 	UIDMappings []LinuxIDMapping `json:"uidMappings,omitempty"`
@@ -295,7 +293,7 @@ type LinuxMemory struct {
 	Kernel *uint64 `json:"kernel,omitempty"`
 	// Kernel memory limit for tcp (in bytes)
 	KernelTCP *uint64 `json:"kernelTCP,omitempty"`
-	// How aggressive the kernel will swap memory pages.
+	// How aggressive the kernel will swap memory pages. Range from 0 to 100.
 	Swappiness *uint64 `json:"swappiness,omitempty"`
 }
 
@@ -337,6 +335,8 @@ type LinuxResources struct {
 	Devices []LinuxDeviceCgroup `json:"devices,omitempty"`
 	// DisableOOMKiller disables the OOM killer for out of memory conditions
 	DisableOOMKiller *bool `json:"disableOOMKiller,omitempty"`
+	// Specify an oom_score_adj for the container.
+	OOMScoreAdj *int `json:"oomScoreAdj,omitempty"`
 	// Memory restriction configuration
 	Memory *LinuxMemory `json:"memory,omitempty"`
 	// CPU resource restriction configuration
@@ -383,7 +383,7 @@ type LinuxDeviceCgroup struct {
 	Access string `json:"access,omitempty"`
 }
 
-// Solaris contains platform-specific configuration for Solaris application containers.
+// Solaris contains platform specific configuration for Solaris application containers.
 type Solaris struct {
 	// SMF FMRI which should go "online" before we start the container process.
 	Milestone string `json:"milestone,omitempty"`
@@ -450,13 +450,15 @@ type WindowsResources struct {
 type WindowsMemoryResources struct {
 	// Memory limit in bytes.
 	Limit *uint64 `json:"limit,omitempty"`
+	// Memory reservation in bytes.
+	Reservation *uint64 `json:"reservation,omitempty"`
 }
 
 // WindowsCPUResources contains CPU resource management settings.
 type WindowsCPUResources struct {
 	// Number of CPUs available to the container.
 	Count *uint64 `json:"count,omitempty"`
-	// CPU shares (relative weight to other containers with cpu shares).
+	// CPU shares (relative weight to other containers with cpu shares). Range is from 1 to 10000.
 	Shares *uint16 `json:"shares,omitempty"`
 	// Specifies the portion of processor cycles that this container can use as a percentage times 100.
 	Maximum *uint16 `json:"maximum,omitempty"`
