@@ -1,6 +1,7 @@
 package defaults
 
 import (
+	"github.com/docker/libentitlement/entitlement"
 	secProfile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"syscall"
@@ -11,10 +12,17 @@ const (
 )
 
 const (
-	NetworkNoneEntId  = "none"  // network.none
-	NetworkUserEntId  = "user"  // network.user
-	NetworkProxyEntId = "proxy" // network.proxy
-	NetworkAdminEntId = "admin" // network.admin
+	NetworkNoneEntFullId  = NetworkTLD + ".none"
+	NetworkUserEntFullId  = NetworkTLD + ".user"
+	NetworkProxyEntFullId = NetworkTLD + ".proxy"
+	NetworkAdminEntFullId = NetworkTLD + ".admin"
+)
+
+var (
+	networkNoneEntitlement  = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkNoneEntitlementEnforce)
+	networkUserEntitlement  = entitlement.NewVoidEntitlement(NetworkUserEntFullId, networkUserEntitlementEnforce)
+	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkProxyEntitlementEnforce)
+	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkAdminEntitlementEnforce)
 )
 
 /* Implements "network.none" entitlement
@@ -26,7 +34,7 @@ const (
  *     setdomainname, bpf
  * - Add network namespace
  */
-func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -53,7 +61,7 @@ func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
  * - Blocked syscalls:
  * 	sethostname, setdomainname bpf, setsockopt(SO_DEBUG)
  */
-func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -80,7 +88,7 @@ func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 	return profile, nil
 }
 
-func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkProxyEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -102,7 +110,7 @@ func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, 
 	return profile, nil
 }
 
-func NetworkAdminEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkAdminEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
 	profile.AddCaps(capsToAdd...)
 
