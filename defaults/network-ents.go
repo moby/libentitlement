@@ -21,8 +21,8 @@ const (
 var (
 	networkNoneEntitlement  = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkNoneEntitlementEnforce)
 	networkUserEntitlement  = entitlement.NewVoidEntitlement(NetworkUserEntFullId, networkUserEntitlementEnforce)
-	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkProxyEntitlementEnforce)
-	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkAdminEntitlementEnforce)
+	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkProxyEntFullId, networkProxyEntitlementEnforce)
+	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkAdminEntFullId, networkAdminEntitlementEnforce)
 )
 
 /* Implements "network.none" entitlement
