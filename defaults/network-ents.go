@@ -69,7 +69,7 @@ func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 	profile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []string{
-		"sethostname", "setdomainname", "bpf",
+		"sethostname", "setdomainname",
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 

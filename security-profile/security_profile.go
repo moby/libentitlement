@@ -86,6 +86,7 @@ func (p *Profile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 
 /* Add seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present */
 func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
+	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
 	/* For each syscall to block we browse each syscall list of each Seccomp rule */
 	for syscallNameToBlock, syscallArgsToBlock := range syscallsWithArgsToBlock {
 		blocked := false
@@ -134,7 +135,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 		}
 
 		/* If we don't find it in a blocking rule, we add one */
-		if !blocked {
+		if !blocked && !defaultActError {
 			newRule := specs.LinuxSyscall{
 				Names:  []string{syscallNameToBlock},
 				Action: specs.ActErrno,
