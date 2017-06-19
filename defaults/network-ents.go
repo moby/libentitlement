@@ -50,6 +50,22 @@ func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 
+	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
+		"socket": {
+			{
+				Index: 0,
+				Op: specs.OpEqualTo,
+				Value: syscall.AF_UNIX,
+			},
+			{
+				Index: 0,
+				Op: specs.OpEqualTo,
+				Value: syscall.AF_LOCAL,
+			},
+		},
+	}
+	profile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
+
 	// FIXME: build an Apparmor Profile if necessary + add `deny network`
 
 	return profile, nil

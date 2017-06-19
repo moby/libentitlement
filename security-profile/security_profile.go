@@ -84,6 +84,36 @@ func (p *Profile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 	}
 }
 
+/* Add seccomp rules to allow syscalls with the given arguments if necessary */
+func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]specs.LinuxSeccompArg) {
+	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
+
+	for syscallNameToAllow, syscallsArgsToAllow := range syscallsWithArgsToAllow {
+
+		for _, syscallRule := range p.Oci.Linux.Seccomp.Syscalls {
+
+			if syscallRule.Action == specs.ActAllow {
+				for _, syscallName := range syscallRule.Names {
+					if syscallName == syscallNameToAllow &&
+						(reflect.DeepEqual(syscallRule.Args, syscallsArgsToAllow) ||
+							reflect.DeepEqual(syscallRule.Args, []specs.LinuxSeccompArg{})) {
+						return
+					}
+				}
+			}
+		}
+
+		if defaultActError {
+			newRule := specs.LinuxSyscall{
+				Names: []string{syscallNameToAllow},
+				Action: specs.ActAllow,
+				Args:  syscallsArgsToAllow,
+			}
+			p.Oci.Linux.Seccomp.Syscalls = append(p.Oci.Linux.Seccomp.Syscalls, newRule)
+		}
+	}
+}
+
 /* Add seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present */
 func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
 	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
