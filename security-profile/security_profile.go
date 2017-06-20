@@ -88,15 +88,15 @@ func (p *Profile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]specs.LinuxSeccompArg) {
 	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
 
-	for syscallNameToAllow, syscallsArgsToAllow := range syscallsWithArgsToAllow {
+	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
 
 		for _, syscallRule := range p.Oci.Linux.Seccomp.Syscalls {
 
 			if syscallRule.Action == specs.ActAllow {
 				for _, syscallName := range syscallRule.Names {
 					if syscallName == syscallNameToAllow &&
-						(reflect.DeepEqual(syscallRule.Args, syscallsArgsToAllow) ||
-							reflect.DeepEqual(syscallRule.Args, []specs.LinuxSeccompArg{})) {
+						((len(syscallArgsToAllow) == 0 && len(syscallRule.Args) == 0) ||
+							reflect.DeepEqual(syscallRule.Args, syscallArgsToAllow)) {
 						return
 					}
 				}
@@ -107,7 +107,7 @@ func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]spe
 			newRule := specs.LinuxSyscall{
 				Names: []string{syscallNameToAllow},
 				Action: specs.ActAllow,
-				Args:  syscallsArgsToAllow,
+				Args:  syscallArgsToAllow,
 			}
 			p.Oci.Linux.Seccomp.Syscalls = append(p.Oci.Linux.Seccomp.Syscalls, newRule)
 		}
@@ -128,7 +128,8 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 				for syscallNameIndex, syscallName := range syscallRule.Names {
 					/* We found the syscall in the syscall list in a rule and arguments are identical */
 					if syscallName == syscallNameToBlock &&
-						reflect.DeepEqual(syscallRule.Args, syscallArgsToBlock) {
+						((len(syscallArgsToBlock) == 0 && len(syscallRule.Args) == 0) ||
+						reflect.DeepEqual(syscallRule.Args, syscallArgsToBlock)) {
 
 						/* If this is the only one, just remove that rule from the Seccomp config */
 						if len(p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names) == 1 {
