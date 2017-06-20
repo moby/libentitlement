@@ -85,7 +85,7 @@ func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 	profile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []string{
-		"sethostname", "setdomainname",
+		"sethostname", "setdomainname", "setsockopt",
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 
@@ -94,12 +94,11 @@ func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 			{
 				Index:    2,
 				Value:    syscall.SO_DEBUG,
-				ValueTwo: 0,
-				Op:       specs.OpEqualTo,
+				Op:       specs.OpNotEqual,
 			},
 		},
 	}
-	profile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
+	profile.AllowSyscallsWithArgs(syscallsWithArgsToBlock)
 
 	return profile, nil
 }
