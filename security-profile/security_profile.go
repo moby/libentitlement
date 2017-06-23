@@ -105,9 +105,9 @@ func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]spe
 
 		if defaultActError {
 			newRule := specs.LinuxSyscall{
-				Names: []string{syscallNameToAllow},
+				Names:  []string{syscallNameToAllow},
 				Action: specs.ActAllow,
-				Args:  syscallArgsToAllow,
+				Args:   syscallArgsToAllow,
 			}
 			p.Oci.Linux.Seccomp.Syscalls = append(p.Oci.Linux.Seccomp.Syscalls, newRule)
 		}
@@ -129,7 +129,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 					/* We found the syscall in the syscall list in a rule and arguments are identical */
 					if syscallName == syscallNameToBlock &&
 						((len(syscallArgsToBlock) == 0 && len(syscallRule.Args) == 0) ||
-						reflect.DeepEqual(syscallRule.Args, syscallArgsToBlock)) {
+							reflect.DeepEqual(syscallRule.Args, syscallArgsToBlock)) {
 
 						/* If this is the only one, just remove that rule from the Seccomp config */
 						if len(p.Oci.Linux.Seccomp.Syscalls[syscallRuleIndex].Names) == 1 {

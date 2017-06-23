@@ -54,12 +54,12 @@ func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 		"socket": {
 			{
 				Index: 0,
-				Op: specs.OpEqualTo,
+				Op:    specs.OpEqualTo,
 				Value: syscall.AF_UNIX,
 			},
 			{
 				Index: 0,
-				Op: specs.OpEqualTo,
+				Op:    specs.OpEqualTo,
 				Value: syscall.AF_LOCAL,
 			},
 		},
@@ -92,9 +92,9 @@ func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 	syscallsWithArgsToBlock := map[string][]specs.LinuxSeccompArg{
 		"setsockopt": {
 			{
-				Index:    2,
-				Value:    syscall.SO_DEBUG,
-				Op:       specs.OpNotEqual,
+				Index: 2,
+				Value: syscall.SO_DEBUG,
+				Op:    specs.OpNotEqual,
 			},
 		},
 	}
