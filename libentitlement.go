@@ -11,14 +11,14 @@ import (
 )
 
 type EntitlementsManager struct {
-	profile         *secprofile.Profile
+	profile         secprofile.Profile
 	entitlementList []entitlement.Entitlement
 	domainManager   *domainmanager.DomainManager
 }
 
 // NewEntitlementsManager() instantiates an EntitlementsManager object with the given profile
 // default
-func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
+func NewEntitlementsManager(profile secprofile.Profile) *EntitlementsManager {
 	if profile == nil {
 		logrus.Errorf("Entilements Manager initialization: invalid security profile - cannot be nil")
 		return nil
@@ -32,7 +32,7 @@ func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 }
 
 // GetProfile() returns the current state of the security profile
-func (m *EntitlementsManager) GetProfile() (*secprofile.Profile, error) {
+func (m *EntitlementsManager) GetProfile() (secprofile.Profile, error) {
 	if m.profile == nil {
 		return nil, fmt.Errorf("Entitlements Manager doesn't have a security profile.")
 	}
@@ -41,7 +41,7 @@ func (m *EntitlementsManager) GetProfile() (*secprofile.Profile, error) {
 }
 
 // SetProfile() sets the entitlement manager's security profile
-func (m *EntitlementsManager) SetProfile(profile *secprofile.Profile) error {
+func (m *EntitlementsManager) SetProfile(profile secprofile.Profile) error {
 	if profile == nil {
 		return fmt.Errorf("Invalid security profile")
 	}

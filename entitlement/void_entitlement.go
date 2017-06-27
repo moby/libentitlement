@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type VoidEntitlementEnforceCallback func(*secprofile.Profile) (*secprofile.Profile, error)
+type VoidEntitlementEnforceCallback func(secprofile.Profile) (secprofile.Profile, error)
 
 type VoidEntitlement struct {
 	domain           []string
@@ -52,7 +52,7 @@ func (e *VoidEntitlement) Value() (string, error) {
 	return "", nil
 }
 
-func (e *VoidEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *VoidEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 

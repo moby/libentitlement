@@ -21,5 +21,5 @@ type Entitlement interface {
 	Value() (string, error)
 	// Enforce should return an updated value of the profile according to
 	// the entitlement spec (FIXME: write a proper entitlement spec and link it in the proposal)
-	Enforce(*secprofile.Profile) (*secprofile.Profile, error)
+	Enforce(secprofile.Profile) (secprofile.Profile, error)
 }
