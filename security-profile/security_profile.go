@@ -88,21 +88,26 @@ func (p *Profile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]specs.LinuxSeccompArg) {
 	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
 
+	/* For each syscall we want to whitelist, we browse each syscall list of each whitelisting Seccomp rule. */
 	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
-
 		for _, syscallRule := range p.Oci.Linux.Seccomp.Syscalls {
-
 			if syscallRule.Action == specs.ActAllow {
 				for _, syscallName := range syscallRule.Names {
+					/* If we match the syscall for a whitelisting rule and the arguments are the same
+					 * we simply move on to the next syscall to be whitelisted.
+					 */
 					if syscallName == syscallNameToAllow &&
 						((len(syscallArgsToAllow) == 0 && len(syscallRule.Args) == 0) ||
 							reflect.DeepEqual(syscallRule.Args, syscallArgsToAllow)) {
-						return
+						continue
 					}
 				}
 			}
 		}
 
+		/* We didn't find it in whitelisting rules so we check that default behavior is to deny
+		 * before adding a new one.
+		 */
 		if defaultActError {
 			newRule := specs.LinuxSyscall{
 				Names:  []string{syscallNameToAllow},
@@ -117,12 +122,11 @@ func (p *Profile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]spe
 /* Add seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present */
 func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
 	defaultActError := (p.Oci.Linux.Seccomp.DefaultAction == specs.ActErrno)
+
 	/* For each syscall to block we browse each syscall list of each Seccomp rule */
 	for syscallNameToBlock, syscallArgsToBlock := range syscallsWithArgsToBlock {
 		blocked := false
-
 		for syscallRuleIndex, syscallRule := range p.Oci.Linux.Seccomp.Syscalls {
-
 			switch syscallRule.Action {
 			case specs.ActAllow, specs.ActTrace, specs.ActTrap:
 				for syscallNameIndex, syscallName := range syscallRule.Names {
@@ -165,7 +169,7 @@ func (p *Profile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]spe
 			}
 		}
 
-		/* If we don't find it in a blocking rule, we add one */
+		/* If we don't find it in a blocking rule and default behavior is not to deny, we add one. */
 		if !blocked && !defaultActError {
 			newRule := specs.LinuxSyscall{
 				Names:  []string{syscallNameToBlock},

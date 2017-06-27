@@ -20,7 +20,7 @@ type EntitlementsManager struct {
 // default
 func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 	if profile == nil {
-		logrus.Errorf("Entilements Manager initialization: invalid security profile - cannot be nil")
+		logrus.Errorf("Entilement Manager initialization: invalid security profile - cannot be nil")
 		return nil
 	}
 
@@ -34,7 +34,7 @@ func NewEntitlementsManager(profile *secprofile.Profile) *EntitlementsManager {
 // GetProfile() returns the current state of the security profile
 func (m *EntitlementsManager) GetProfile() (*secprofile.Profile, error) {
 	if m.profile == nil {
-		return nil, fmt.Errorf("Entitlements Manager has np security profile.")
+		return nil, fmt.Errorf("Entitlement Manager doesn't have a security profile.")
 	}
 
 	return m.profile, nil
@@ -69,11 +69,11 @@ func isValidEntitlement(ent entitlement.Entitlement) (bool, error) {
 	return true, nil
 }
 
-// AddDefault() adds a default entitlement identified by the "
+// AddDefault() adds a default entitlement identified by entName which must be a default identifier.
 func (m *EntitlementsManager) AddDefault(entName string) error {
 	defaultEnt, ok := defaults.DefaultEntitlements[entName]
 	if !ok {
-		return fmt.Errorf("Couldn't add invalid default entitlement name")
+		return fmt.Errorf("Couldn't add invalid default entitlement name: %s", entName)
 	}
 
 	return m.Add(defaultEnt)

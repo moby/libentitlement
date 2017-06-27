@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	NetworkTLD = "network"
+	networkDomain = "network"
 )
 
 const (
-	NetworkNoneEntFullId  = NetworkTLD + ".none"
-	NetworkUserEntFullId  = NetworkTLD + ".user"
-	NetworkProxyEntFullId = NetworkTLD + ".proxy"
-	NetworkAdminEntFullId = NetworkTLD + ".admin"
+	NetworkNoneEntFullId  = networkDomain + ".none"
+	NetworkUserEntFullId  = networkDomain + ".user"
+	NetworkProxyEntFullId = networkDomain + ".proxy"
+	NetworkAdminEntFullId = networkDomain + ".admin"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
  * - Blocked syscalls:
  *     socket, socketpair, setsockopt, getsockopt, getsockname, getpeername, bind, listen, accept,
  *     accept4, connect, shutdown,recvfrom, recvmsg, sendto, sendmsg, sendmmsg, sethostname,
- *     setdomainname, bpf
+ *     setdomainname
  * - Add network namespace
  */
 func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
@@ -46,7 +46,7 @@ func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
 
 	syscallsToBlock := []string{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername",
 		"bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "sendto",
-		"sendmsg", "sendmmsg", "sethostname",
+		"sendmsg", "sendmmsg", "sethostname", "setdomainname",
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 
@@ -75,7 +75,7 @@ func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
  * - No caps: CAP_NET_ADMIN, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  * - Authorized caps: CAP_NET_BROADCAST
  * - Blocked syscalls:
- * 	sethostname, setdomainname bpf, setsockopt(SO_DEBUG)
+ * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
 func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
