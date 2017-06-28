@@ -1,20 +1,28 @@
 package defaults
 
 import (
+	"github.com/docker/libentitlement/entitlement"
 	secProfile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"syscall"
 )
 
 const (
-	NetworkTLD = "network"
+	networkDomain = "network"
 )
 
 const (
-	NetworkNoneEntId  = "none"  // network.none
-	NetworkUserEntId  = "user"  // network.user
-	NetworkProxyEntId = "proxy" // network.proxy
-	NetworkAdminEntId = "admin" // network.admin
+	NetworkNoneEntFullId  = networkDomain + ".none"
+	NetworkUserEntFullId  = networkDomain + ".user"
+	NetworkProxyEntFullId = networkDomain + ".proxy"
+	NetworkAdminEntFullId = networkDomain + ".admin"
+)
+
+var (
+	networkNoneEntitlement  = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkNoneEntitlementEnforce)
+	networkUserEntitlement  = entitlement.NewVoidEntitlement(NetworkUserEntFullId, networkUserEntitlementEnforce)
+	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkProxyEntFullId, networkProxyEntitlementEnforce)
+	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkAdminEntFullId, networkAdminEntitlementEnforce)
 )
 
 /* Implements "network.none" entitlement
@@ -23,10 +31,10 @@ const (
  * - Blocked syscalls:
  *     socket, socketpair, setsockopt, getsockopt, getsockname, getpeername, bind, listen, accept,
  *     accept4, connect, shutdown,recvfrom, recvmsg, sendto, sendmsg, sendmmsg, sethostname,
- *     setdomainname, bpf
+ *     setdomainname, socket for non AF_LOCAL/AF_UNIX domain
  * - Add network namespace
  */
-func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -38,9 +46,25 @@ func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 
 	syscallsToBlock := []string{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername",
 		"bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "sendto",
-		"sendmsg", "sendmmsg", "sethostname",
+		"sendmsg", "sendmmsg", "sethostname", "setdomainname",
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
+
+	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
+		"socket": {
+			{
+				Index: 0,
+				Op:    specs.OpEqualTo,
+				Value: syscall.AF_UNIX,
+			},
+			{
+				Index: 0,
+				Op:    specs.OpEqualTo,
+				Value: syscall.AF_LOCAL,
+			},
+		},
+	}
+	profile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
 	// FIXME: build an Apparmor Profile if necessary + add `deny network`
 
@@ -51,9 +75,9 @@ func NetworkNoneEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
  * - No caps: CAP_NET_ADMIN, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  * - Authorized caps: CAP_NET_BROADCAST
  * - Blocked syscalls:
- * 	sethostname, setdomainname bpf, setsockopt(SO_DEBUG)
+ * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
-func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -61,26 +85,31 @@ func NetworkUserEntitlement(profile *secProfile.Profile) (*secProfile.Profile, e
 	profile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []string{
-		"sethostname", "setdomainname", "bpf",
+		"sethostname", "setdomainname", "setsockopt",
 	}
 	profile.BlockSyscalls(syscallsToBlock...)
 
-	syscallsWithArgsToBlock := map[string][]specs.LinuxSeccompArg{
+	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
 		"setsockopt": {
 			{
-				Index:    2,
-				Value:    syscall.SO_DEBUG,
-				ValueTwo: 0,
-				Op:       specs.OpEqualTo,
+				Index: 2,
+				Value: syscall.SO_DEBUG,
+				Op:    specs.OpNotEqual,
 			},
 		},
 	}
-	profile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
+	profile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
 	return profile, nil
 }
 
-func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+/* Implements "network.proxy" entitlement
+ * - No caps: CAP_NET_ADMIN
+ * - Authorized caps: CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
+ * - Blocked syscalls:
+ * 	setsockopt(SO_DEBUG)
+ */
+func networkProxyEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -102,7 +131,10 @@ func NetworkProxyEntitlement(profile *secProfile.Profile) (*secProfile.Profile, 
 	return profile, nil
 }
 
-func NetworkAdminEntitlement(profile *secProfile.Profile) (*secProfile.Profile, error) {
+/* Implements "network.admin" entitlement
+ * - Authorized caps: CAP_NET_ADMIN, CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
+ */
+func networkAdminEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
 	profile.AddCaps(capsToAdd...)
 
