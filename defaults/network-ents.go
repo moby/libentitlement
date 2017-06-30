@@ -1,10 +1,12 @@
 package defaults
 
 import (
-	"github.com/docker/libentitlement/entitlement"
-	secProfile "github.com/docker/libentitlement/security-profile"
-	"github.com/opencontainers/runtime-spec/specs-go"
 	"syscall"
+
+	"github.com/opencontainers/runtime-spec/specs-go"
+
+	"github.com/docker/libentitlement/entitlement"
+	secprofile "github.com/docker/libentitlement/secprofile"
 )
 
 const (
@@ -12,17 +14,21 @@ const (
 )
 
 const (
-	NetworkNoneEntFullId  = networkDomain + ".none"
-	NetworkUserEntFullId  = networkDomain + ".user"
-	NetworkProxyEntFullId = networkDomain + ".proxy"
-	NetworkAdminEntFullId = networkDomain + ".admin"
+	// NetworkNoneEntFullID is the ID for the network.none entitlement
+	NetworkNoneEntFullID = networkDomain + ".none"
+	// NetworkUserEntFullID is the ID for the network.user entitlement
+	NetworkUserEntFullID = networkDomain + ".user"
+	// NetworkProxyEntFullID is the ID for the network.proxy entitlement
+	NetworkProxyEntFullID = networkDomain + ".proxy"
+	// NetworkAdminEntFullID is the ID for the network.admin entitlement
+	NetworkAdminEntFullID = networkDomain + ".admin"
 )
 
 var (
-	networkNoneEntitlement  = entitlement.NewVoidEntitlement(NetworkNoneEntFullId, networkNoneEntitlementEnforce)
-	networkUserEntitlement  = entitlement.NewVoidEntitlement(NetworkUserEntFullId, networkUserEntitlementEnforce)
-	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkProxyEntFullId, networkProxyEntitlementEnforce)
-	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkAdminEntFullId, networkAdminEntitlementEnforce)
+	networkNoneEntitlement  = entitlement.NewVoidEntitlement(NetworkNoneEntFullID, networkNoneEntitlementEnforce)
+	networkUserEntitlement  = entitlement.NewVoidEntitlement(NetworkUserEntFullID, networkUserEntitlementEnforce)
+	networkProxyEntitlement = entitlement.NewVoidEntitlement(NetworkProxyEntFullID, networkProxyEntitlementEnforce)
+	networkAdminEntitlement = entitlement.NewVoidEntitlement(NetworkAdminEntFullID, networkAdminEntitlementEnforce)
 )
 
 /* Implements "network.none" entitlement
@@ -34,7 +40,7 @@ var (
  *     setdomainname, socket for non AF_LOCAL/AF_UNIX domain
  * - Add network namespace
  */
-func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkNoneEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -77,7 +83,7 @@ func networkNoneEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
  * - Blocked syscalls:
  * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
-func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkUserEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -109,7 +115,7 @@ func networkUserEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pro
  * - Blocked syscalls:
  * 	setsockopt(SO_DEBUG)
  */
-func networkProxyEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkProxyEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	capsToRemove := []string{"CAP_NET_ADMIN"}
 	profile.RemoveCaps(capsToRemove...)
 
@@ -134,7 +140,7 @@ func networkProxyEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Pr
 /* Implements "network.admin" entitlement
  * - Authorized caps: CAP_NET_ADMIN, CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  */
-func networkAdminEntitlementEnforce(profile *secProfile.Profile) (*secProfile.Profile, error) {
+func networkAdminEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
 	profile.AddCaps(capsToAdd...)
 

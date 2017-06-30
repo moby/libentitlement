@@ -2,20 +2,25 @@ package entitlement
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/parser"
-	secprofile "github.com/docker/libentitlement/security-profile"
 	"strings"
+
+	"github.com/Sirupsen/logrus"
+
+	"github.com/docker/libentitlement/parser"
+	secprofile "github.com/docker/libentitlement/secprofile"
 )
 
+// VoidEntitlementEnforceCallback should take the security profile to update with the constraints
 type VoidEntitlementEnforceCallback func(*secprofile.Profile) (*secprofile.Profile, error)
 
+// VoidEntitlement is an entitlement without parameters
 type VoidEntitlement struct {
-	domain           []string
-	id               string
-	enforce_callback VoidEntitlementEnforceCallback
+	domain          []string
+	id              string
+	enforceCallback VoidEntitlementEnforceCallback
 }
 
+// NewVoidEntitlement instantiates a new VoidEntitlement
 func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback) *VoidEntitlement {
 	domain, id, err := parser.ParseVoidEntitlement(fullName)
 	if err != nil {
@@ -23,9 +28,10 @@ func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback
 		return nil
 	}
 
-	return &VoidEntitlement{domain: domain, id: id, enforce_callback: callback}
+	return &VoidEntitlement{domain: domain, id: id, enforceCallback: callback}
 }
 
+// Domain returns the entitlement's domain name
 func (e *VoidEntitlement) Domain() (string, error) {
 	if len(e.domain) < 1 {
 		id, err := e.Identifier()
@@ -39,6 +45,7 @@ func (e *VoidEntitlement) Domain() (string, error) {
 	return strings.Join(e.domain, "."), nil
 }
 
+// Identifier returns the entitlement's identifier
 func (e *VoidEntitlement) Identifier() (string, error) {
 	if e.id == "" {
 		return "", fmt.Errorf("No identifier found for current entitlement")
@@ -47,20 +54,22 @@ func (e *VoidEntitlement) Identifier() (string, error) {
 	return e.id, nil
 }
 
-// Value() should not be called on a void entitlement
+// Value should not be called on a void entitlement
 func (e *VoidEntitlement) Value() (string, error) {
 	return "", nil
 }
 
+// Enforce calls the enforcement callback which applies the constraints on the security profile
+// based on the entitlement value
 func (e *VoidEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 
-	if e.enforce_callback == nil {
+	if e.enforceCallback == nil {
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforce_callback(profile)
+	newProfile, err := e.enforceCallback(profile)
 	if err != nil {
 		return nil, err
 	}

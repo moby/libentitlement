@@ -2,24 +2,27 @@ package entitlement
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/parser"
-	secprofile "github.com/docker/libentitlement/security-profile"
 	"strings"
+
+	"github.com/Sirupsen/logrus"
+
+	"github.com/docker/libentitlement/parser"
+	secprofile "github.com/docker/libentitlement/secprofile"
 )
 
-// String entitlement's enforcement callback should take the security profile to update with the constraints and
+// StringEntitlementEnforceCallback should take the security profile to update with the constraints and
 // the entitlement value as a parameter when being executed
 type StringEntitlementEnforceCallback func(*secprofile.Profile, string) (*secprofile.Profile, error)
 
-// String entitlements are entitlements with an explicit string value
+// StringEntitlement is an entitlements with an explicit string value
 type StringEntitlement struct {
-	domain           []string
-	id               string
-	value            string
-	enforce_callback StringEntitlementEnforceCallback
+	domain          []string
+	id              string
+	value           string
+	enforceCallback StringEntitlementEnforceCallback
 }
 
+// NewStringEntitlement instantiates a new StringEntitlement
 func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCallback) *StringEntitlement {
 	domain, id, value, err := parser.ParseStringEntitlement(fullName)
 	if err != nil {
@@ -29,10 +32,10 @@ func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCall
 
 	// FIXME: Add entitlement domain and the identifier to it
 
-	return &StringEntitlement{domain: domain, id: id, value: value, enforce_callback: callback}
+	return &StringEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
 }
 
-// Domain() returns the entitlement's domain name
+// Domain returns the entitlement's domain name
 func (e *StringEntitlement) Domain() (string, error) {
 	if len(e.domain) < 1 {
 		id, err := e.Identifier()
@@ -46,7 +49,7 @@ func (e *StringEntitlement) Domain() (string, error) {
 	return strings.Join(e.domain, "."), nil
 }
 
-// Identifier() returns the entitlement's identifier
+// Identifier returns the entitlement's identifier
 func (e *StringEntitlement) Identifier() (string, error) {
 	if e.id == "" {
 		return "", fmt.Errorf("No identifier found for current entitlement")
@@ -55,7 +58,7 @@ func (e *StringEntitlement) Identifier() (string, error) {
 	return e.id, nil
 }
 
-// Value() returns the entitlement's value.
+// Value returns the entitlement's value.
 // Note: String entitlements need an explicit value, it can't be an empty string
 func (e *StringEntitlement) Value() (string, error) {
 	if e.value == "" {
@@ -67,7 +70,7 @@ func (e *StringEntitlement) Value() (string, error) {
 	return e.value, nil
 }
 
-// Enforce() calls the enforcement callback which applies the constraints on the security profile
+// Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
 func (e *StringEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
 	value, err := e.Value()
@@ -75,13 +78,13 @@ func (e *StringEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Pr
 		return nil, err
 	}
 
-	if e.enforce_callback == nil {
+	if e.enforceCallback == nil {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforce_callback(profile, value)
+	newProfile, err := e.enforceCallback(profile, value)
 	if err != nil {
 		return nil, err
 	}

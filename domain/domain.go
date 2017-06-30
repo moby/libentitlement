@@ -2,52 +2,59 @@ package domainmanager
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/parser"
-	"strings"
 )
 
+// Domain defines the scoping for entitlements, ie Network
 type Domain struct {
 	name           string
 	subdomains     map[string]*Domain
-	entitlementIds map[string]bool
+	entitlementIDs map[string]bool
 }
 
+// NewDomain instantiates a new domain according the provided string name
 func NewDomain(name string) *Domain {
 	if parser.IsValidDomainName(name) == false {
 		logrus.Errorf("Invalid domain name for: %s", name)
 	}
 
 	subdomainsMap := make(map[string]*Domain)
-	entitlementIdList := make(map[string]bool)
+	entitlementIDList := make(map[string]bool)
 
-	return &Domain{name: name, subdomains: subdomainsMap, entitlementIds: entitlementIdList}
+	return &Domain{name: name, subdomains: subdomainsMap, entitlementIDs: entitlementIDList}
 }
 
+// AddSubdomains adds subdomains to the given domain
 func (d *Domain) AddSubdomains(subdomains ...*Domain) {
 	for _, subdomain := range subdomains {
 		d.subdomains[subdomain.name] = subdomain
 	}
 }
 
-func (d *Domain) AddEntitlementIds(entitlementIds ...string) {
-	for _, entitlementId := range entitlementIds {
-		if _, ok := d.entitlementIds[entitlementId]; !ok {
-			d.entitlementIds[entitlementId] = true
+// AddEntitlementIDs adds entitlements by IDs to the given domain
+func (d *Domain) AddEntitlementIDs(entitlementIDs ...string) {
+	for _, entitlementID := range entitlementIDs {
+		if _, ok := d.entitlementIDs[entitlementID]; !ok {
+			d.entitlementIDs[entitlementID] = true
 		}
 	}
 }
 
+// DomainManager keeps a map of domains by name
 type DomainManager struct {
 	domains map[string]*Domain
 }
 
+// NewDomainManager instantiates an empty Domainmanager
 func NewDomainManager() *DomainManager {
 	return &DomainManager{domains: make(map[string]*Domain)}
 }
 
 // Add a complete subdomain "chain" to a TLD
-func addFullSubdomainWithEntitlementIdtoTLD(tld *Domain, fullSubdomain []string, entitlementId string) {
+func addFullSubdomainWithEntitlementIDtoTLD(tld *Domain, fullSubdomain []string, entitlementID string) {
 	// Shouldn't happen, so do nothing
 	if len(fullSubdomain) < 1 || tld == nil {
 		return
@@ -58,7 +65,7 @@ func addFullSubdomainWithEntitlementIdtoTLD(tld *Domain, fullSubdomain []string,
 	// We are treating the last domain component of the list so we add the entitlement ID to it
 	if len(fullSubdomain) == 1 {
 		currentLevelDomain := NewDomain(currentLevelDomainName)
-		currentLevelDomain.AddEntitlementIds(entitlementId)
+		currentLevelDomain.AddEntitlementIDs(entitlementID)
 
 		if _, ok := tld.subdomains[currentLevelDomainName]; !ok {
 			tld.subdomains[currentLevelDomainName] = currentLevelDomain
@@ -71,16 +78,17 @@ func addFullSubdomainWithEntitlementIdtoTLD(tld *Domain, fullSubdomain []string,
 
 	currentLevelDomain := NewDomain(currentLevelDomainName)
 
-	addFullSubdomainWithEntitlementIdtoTLD(currentLevelDomain, nextLevels, entitlementId)
+	addFullSubdomainWithEntitlementIDtoTLD(currentLevelDomain, nextLevels, entitlementID)
 
 	if _, ok := tld.subdomains[currentLevelDomainName]; !ok {
 		tld.subdomains[currentLevelDomainName] = currentLevelDomain
 	}
 }
 
-func (m *DomainManager) AddFullDomainWithEntitlementId(fulldomain []string, entitlementId string) error {
+// AddFullDomainWithEntitlementID adds entitlements by IDs to a list of domains
+func (m *DomainManager) AddFullDomainWithEntitlementID(fulldomain []string, entitlementID string) error {
 	if len(fulldomain) == 0 {
-		return fmt.Errorf("Invalid domain - can't add entitlementId: %s", entitlementId)
+		return fmt.Errorf("Invalid domain - can't add entitlementID: %s", entitlementID)
 	}
 
 	if parser.IsValidDomainNameList(fulldomain) == false {
@@ -94,8 +102,8 @@ func (m *DomainManager) AddFullDomainWithEntitlementId(fulldomain []string, enti
 			m.domains[tldName] = NewDomain(tldName)
 		}
 
-		if _, ok := m.domains[tldName].entitlementIds[entitlementId]; !ok {
-			m.domains[tldName].entitlementIds[entitlementId] = true
+		if _, ok := m.domains[tldName].entitlementIDs[entitlementID]; !ok {
+			m.domains[tldName].entitlementIDs[entitlementID] = true
 		}
 
 		return nil
@@ -107,7 +115,7 @@ func (m *DomainManager) AddFullDomainWithEntitlementId(fulldomain []string, enti
 		m.domains[tldName] = NewDomain(tldName)
 	}
 
-	addFullSubdomainWithEntitlementIdtoTLD(m.domains[tldName], fullSubdomain, entitlementId)
+	addFullSubdomainWithEntitlementIDtoTLD(m.domains[tldName], fullSubdomain, entitlementID)
 
 	return nil
 }

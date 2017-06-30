@@ -2,11 +2,13 @@ package libentitlement
 
 import (
 	"fmt"
-	"github.com/docker/libentitlement/entitlement"
-	secprofile "github.com/docker/libentitlement/security-profile"
+	"testing"
+
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/docker/libentitlement/entitlement"
+	secprofile "github.com/docker/libentitlement/secprofile"
 )
 
 func testSpec() *specs.Spec {
@@ -47,7 +49,7 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 	// Add a dummy "foo.bar.cap-sys-admin" void entitlement that adds CAP_SYS_ADMIN
 	capSysAdminVoidEntCallback := func(profile *secprofile.Profile) (*secprofile.Profile, error) {
 		if profile == nil {
-			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
+			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil")
 		}
 
 		profile.AddCaps("CAP_SYS_ADMIN")
@@ -62,8 +64,8 @@ func TestRegisterDummyEntitlement(t *testing.T) {
 	err := entMgr.Add(capSysAdminVoidEnt)
 	require.NoError(t, err, "Entitlement %s should have been added and enforced", capSysAdminVoidEntFullName)
 
-	require.Contains(t, profile.Oci.Process.Capabilities.Bounding, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, profile.Oci.Process.Capabilities.Effective, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, profile.Oci.Process.Capabilities.Permitted, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
-	require.Contains(t, profile.Oci.Process.Capabilities.Inheritable, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.OCI.Process.Capabilities.Bounding, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.OCI.Process.Capabilities.Effective, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.OCI.Process.Capabilities.Permitted, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
+	require.Contains(t, profile.OCI.Process.Capabilities.Inheritable, "CAP_SYS_ADMIN", "Capability is missing after entitlement enforcement")
 }
