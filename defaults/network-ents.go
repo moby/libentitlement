@@ -2,10 +2,11 @@ package defaults
 
 import (
 	"fmt"
+	"syscall"
+
 	"github.com/docker/libentitlement/entitlement"
 	secProfile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"syscall"
 )
 
 const (

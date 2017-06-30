@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-var OciProfileType = "oci-profile"
+var OciProfileType = ProfileType("oci-profile")
 
 type AppArmorProfile struct {
 	Rules []string
@@ -25,7 +25,7 @@ func NewOciProfile(ociSpec *specs.Spec) *OciProfile {
 	return &OciProfile{Oci: ociSpec}
 }
 
-func (p *OciProfile) GetType() string {
+func (p *OciProfile) GetType() ProfileType {
 	return OciProfileType
 }
 
