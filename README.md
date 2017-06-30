@@ -30,43 +30,45 @@ the following types:
 Entitlements can be initialize with two parameters:
 - `fullName`: a string with the following format `domain-name.identifier[=argument]`
 - `callback`: a entitlement enforcement callback that takes the following arguments:
-  - a security profile with `security_profile.Profile` type (for now it's an OCI specs struct)
+  - a security profile honoring the `security_profile.Profile` interface (for now we use the specialized `OciProfile` type)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
 ### Example
 A quick example on how to use entitlements in your container manager:
 ```golang
-/* 'security_profile.Profile' type is an OCI specs config struct for now
+/* security_profile.Profile is an abstract interface and
+ * security_profile.OciProfile is an implementation with OCI specs config.
  * We'll add abstract API access management in it. This is the security
  * profile to modify in your entitlement.
  * You should provide your own initialized OCI config to the entitlement manager.
  */
-profile := security_profile.NewProfile(OCI_config)
+ociProfile := security_profile.NewOciProfile(OCI_config)
 
 /* Initialize an entitlement manager which manages entitlements and provide them with
  * an updated security profile
  */
-entMgr := NewEntitlementsManager(profile)
-
-/* This is where you implement your entitlements.
- * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
- * capability to a security profile.
- */
-capSysAdminEntCallback := func (profile *secProfile.Profile) (*secProfile.Profile, error) {
-	if profile == nil {
-		return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
-	}
-
-	profile.AddCaps("CAP_SYS_ADMIN")
-
-	return profile, nil
-}
+entMgr := NewEntitlementsManager(ociProfile)
 
 /* We can call our entitlement "cap-sys-admin" and have it under the "security.custom.caps" domain
  * Note: "security.custom.caps.cap-sys-admin" is different from "foobar.cap-sys-admin" as they are
  * in two different domains.
  */
 capSysAdminEntFullName := "security.custom.cap-sys-admin"
+
+/* This is where you implement your entitlements.
+ * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
+ * capability to a security profile.
+ */
+capSysAdminEntCallback := func (profile secProfile.Profile) (secProfile.Profile, error) {
+    ociProfile, ok := profile.(*secProfile.OciProfile)
+    if !ok {
+        return nil, fmt.Errorf("%s: error converting to OCI profile", capSysAdminEntFullName)
+    }
+
+    ociProfile.AddCaps("CAP_SYS_ADMIN")
+
+    return ociProfile, nil
+}
 
 /* We create a void entitlement (no parameter) with the name and the callback */
 capSysAdminVoidEnt := entitlement.NewVoidEntitlement(capSysAdminEntFullName, capSysAdminEntCallback)

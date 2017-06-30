@@ -2,6 +2,7 @@ package libentitlement
 
 import (
 	"fmt"
+	"github.com/docker/libentitlement/defaults"
 	"github.com/docker/libentitlement/entitlement"
 	secprofile "github.com/docker/libentitlement/security-profile"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -40,17 +41,18 @@ func testSpec() *specs.Spec {
 
 func TestRegisterDummyEntitlement(t *testing.T) {
 	spec := testSpec()
-	profile := secprofile.NewProfile(spec)
+	profile := secprofile.NewOciProfile(spec)
 
 	entMgr := NewEntitlementsManager(profile)
 
 	// Add a dummy "foo.bar.cap-sys-admin" void entitlement that adds CAP_SYS_ADMIN
-	capSysAdminVoidEntCallback := func(profile *secprofile.Profile) (*secprofile.Profile, error) {
-		if profile == nil {
-			return nil, fmt.Errorf("CapSysAdminVoidEntCallback - profile is nil.")
+	capSysAdminVoidEntCallback := func(profile secprofile.Profile) (secprofile.Profile, error) {
+		ociProfile, ok := profile.(*secprofile.OciProfile)
+		if !ok {
+			return nil, fmt.Errorf("%s: error converting to OCI profile", defaults.NetworkNoneEntFullId)
 		}
 
-		profile.AddCaps("CAP_SYS_ADMIN")
+		ociProfile.AddCaps("CAP_SYS_ADMIN")
 
 		return profile, nil
 	}
