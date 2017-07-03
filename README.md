@@ -37,7 +37,7 @@ Entitlements can be initialize with two parameters:
 A quick example on how to use entitlements in your container manager:
 ```golang
 /* security_profile.Profile is an abstract interface and
- * security_profile.OciProfile is a implementation with OCI specs config.
+ * security_profile.OciProfile is an implementation with OCI specs config.
  * We'll add abstract API access management in it. This is the security
  * profile to modify in your entitlement.
  * You should provide your own initialized OCI config to the entitlement manager.

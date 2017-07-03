@@ -5,8 +5,8 @@ import (
 	"reflect"
 )
 
-// OCIProfileType is a string identifier for a profile of type OCIProfile
-var OCIProfileType = "oci-profile"
+// OCIProfileType is an identifier for an OCI profile
+var OCIProfileType = ProfileType("oci-profile")
 
 // AppArmorProfile is a set of AppArmor rules
 type AppArmorProfile struct {
@@ -29,7 +29,7 @@ func NewOCIProfile(ociSpec *specs.Spec) *OCIProfile {
 }
 
 // GetType returns the OCI profile type identifier
-func (p *OCIProfile) GetType() string {
+func (p *OCIProfile) GetType() ProfileType {
 	return OCIProfileType
 }
 
