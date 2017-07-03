@@ -10,13 +10,15 @@ import (
 // FIXME: refactor shared code between each Parse[..]Entitlement functions
 // FIXME: create error objects
 
-// Matches alphanum string containing alphanum substrings separated by single dashes
+// isAlphanumOrDash is a regex matching alphanum string containing alphanum substrings separated by single dashes
 var isAlphanumOrDash = regexp.MustCompile(`^[a-zA-Z0-9]+(\-[a-zA-Z0-9]+)*$`).MatchString
 
+// IsValidDomainName returns whether a given string is a valid domain name
 func IsValidDomainName(domain string) bool {
 	return isAlphanumOrDash(domain)
 }
 
+// IsValidDomainNameList returns whether the list of domain names contains all valid domain names
 func IsValidDomainNameList(domain []string) bool {
 	for _, domainField := range domain {
 		if IsValidDomainName(domainField) == false {
@@ -27,11 +29,12 @@ func IsValidDomainNameList(domain []string) bool {
 	return true
 }
 
+// IsValidIdentifier returns whether the given string is a valid identifier
 func IsValidIdentifier(identifier string) bool {
 	return isAlphanumOrDash(identifier)
 }
 
-// ParseVoidEntitlement() parses an entitlement with the following format: "domain-name.identifier"
+// ParseVoidEntitlement parses an entitlement with the following format: "domain-name.identifier"
 func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
@@ -52,7 +55,7 @@ func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string,
 	return
 }
 
-// ParseIntEntitlement() parses an entitlement with the following format: "domain-name.identifier=int64-value"
+// ParseIntEntitlement parses an entitlement with the following format: "domain-name.identifier=int64-value"
 func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, value int, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
@@ -86,7 +89,7 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 	return
 }
 
-// ParseStringEntitlement() parses an entitlement with the following format: "domain-name.identifier=string-value"
+// ParseStringEntitlement parses an entitlement with the following format: "domain-name.identifier=string-value"
 func ParseStringEntitlement(entitlementFormat string) (domain []string, id, value string, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {

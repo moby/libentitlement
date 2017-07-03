@@ -1,8 +1,10 @@
 # run all lint functionality - excludes vendoring
 lint:
-	@echo "+ $@: gofmt, govet, gocyclo, misspell, ineffassign"
+	@echo "+ $@: gofmt, golint, govet, gocyclo, misspell, ineffassign"
 	# gofmt
 	@test -z "$$(gofmt -s -l .| grep -v .pb. | grep -v vendor/ | tee /dev/stderr)"
+	# golint
+	@test -z "$(shell find . -type f -name "*.go" -not -path "./vendor/*" -not -name "*.pb.*" -exec golint {} \; | tee /dev/stderr)"
 	# govet
 	@test -z "$$(go tool vet -printf=false . 2>&1 | grep -v vendor/ | tee /dev/stderr)"
 	# gocyclo - we require cyclomatic complexity to be < 16

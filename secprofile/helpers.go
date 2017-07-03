@@ -1,4 +1,4 @@
-package security_profile
+package secprofile
 
 /* Add capability if not present to capability set */
 func addCapToList(capList []string, capToAdd string) []string {
