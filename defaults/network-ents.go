@@ -1,12 +1,12 @@
 package defaults
 
 import (
+	"fmt"
 	"syscall"
 
-	"github.com/opencontainers/runtime-spec/specs-go"
-
 	"github.com/docker/libentitlement/entitlement"
-	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 const (
@@ -40,21 +40,30 @@ var (
  *     setdomainname, socket for non AF_LOCAL/AF_UNIX domain
  * - Add network namespace
  */
-func networkNoneEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
+	if profile.GetType() != secprofile.OCIProfileType {
+		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkNoneEntFullID)
+	}
+
+	ociProfile, ok := profile.(*secprofile.OCIProfile)
+	if !ok {
+		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkNoneEntFullID)
+	}
+
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
-	profile.RemoveCaps(capsToRemove...)
+	ociProfile.RemoveCaps(capsToRemove...)
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
-	profile.AddMaskedPaths(pathsToMask...)
+	ociProfile.AddMaskedPaths(pathsToMask...)
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	profile.AddNamespaces(nsToAdd...)
+	ociProfile.AddNamespaces(nsToAdd...)
 
 	syscallsToBlock := []string{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername",
 		"bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "sendto",
 		"sendmsg", "sendmmsg", "sethostname", "setdomainname",
 	}
-	profile.BlockSyscalls(syscallsToBlock...)
+	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
 		"socket": {
@@ -70,7 +79,7 @@ func networkNoneEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pro
 			},
 		},
 	}
-	profile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
+	ociProfile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
 	// FIXME: build an Apparmor Profile if necessary + add `deny network`
 
@@ -83,17 +92,26 @@ func networkNoneEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pro
  * - Blocked syscalls:
  * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
-func networkUserEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
+	if profile.GetType() != secprofile.OCIProfileType {
+		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkUserEntFullID)
+	}
+
+	ociProfile, ok := profile.(*secprofile.OCIProfile)
+	if !ok {
+		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkUserEntFullID)
+	}
+
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
-	profile.RemoveCaps(capsToRemove...)
+	ociProfile.RemoveCaps(capsToRemove...)
 
 	capsToAdd := []string{"CAP_NET_BROADCAST"}
-	profile.AddCaps(capsToAdd...)
+	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []string{
 		"sethostname", "setdomainname", "setsockopt",
 	}
-	profile.BlockSyscalls(syscallsToBlock...)
+	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
 		"setsockopt": {
@@ -104,7 +122,7 @@ func networkUserEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pro
 			},
 		},
 	}
-	profile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
+	ociProfile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
 	return profile, nil
 }
@@ -115,12 +133,21 @@ func networkUserEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pro
  * - Blocked syscalls:
  * 	setsockopt(SO_DEBUG)
  */
-func networkProxyEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
+	if profile.GetType() != secprofile.OCIProfileType {
+		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkProxyEntFullID)
+	}
+
+	ociProfile, ok := profile.(*secprofile.OCIProfile)
+	if !ok {
+		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkProxyEntFullID)
+	}
+
 	capsToRemove := []string{"CAP_NET_ADMIN"}
-	profile.RemoveCaps(capsToRemove...)
+	ociProfile.RemoveCaps(capsToRemove...)
 
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE"}
-	profile.AddCaps(capsToAdd...)
+	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsWithArgsToBlock := map[string][]specs.LinuxSeccompArg{
 		"setsockopt": {
@@ -132,7 +159,7 @@ func networkProxyEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pr
 			},
 		},
 	}
-	profile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
+	ociProfile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
 
 	return profile, nil
 }
@@ -140,9 +167,18 @@ func networkProxyEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Pr
 /* Implements "network.admin" entitlement
  * - Authorized caps: CAP_NET_ADMIN, CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  */
-func networkAdminEntitlementEnforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func networkAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
+	if profile.GetType() != secprofile.OCIProfileType {
+		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkAdminEntFullID)
+	}
+
+	ociProfile, ok := profile.(*secprofile.OCIProfile)
+	if !ok {
+		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkAdminEntFullID)
+	}
+
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
-	profile.AddCaps(capsToAdd...)
+	ociProfile.AddCaps(capsToAdd...)
 
 	return profile, nil
 }

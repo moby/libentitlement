@@ -11,7 +11,7 @@ import (
 )
 
 // VoidEntitlementEnforceCallback should take the security profile to update with the constraints
-type VoidEntitlementEnforceCallback func(*secprofile.Profile) (*secprofile.Profile, error)
+type VoidEntitlementEnforceCallback func(secprofile.Profile) (secprofile.Profile, error)
 
 // VoidEntitlement is an entitlement without parameters
 type VoidEntitlement struct {
@@ -61,7 +61,7 @@ func (e *VoidEntitlement) Value() (string, error) {
 
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
-func (e *VoidEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *VoidEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 

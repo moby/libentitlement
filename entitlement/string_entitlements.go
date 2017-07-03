@@ -12,7 +12,7 @@ import (
 
 // StringEntitlementEnforceCallback should take the security profile to update with the constraints and
 // the entitlement value as a parameter when being executed
-type StringEntitlementEnforceCallback func(*secprofile.Profile, string) (*secprofile.Profile, error)
+type StringEntitlementEnforceCallback func(secprofile.Profile, string) (secprofile.Profile, error)
 
 // StringEntitlement is an entitlements with an explicit string value
 type StringEntitlement struct {
@@ -72,7 +72,7 @@ func (e *StringEntitlement) Value() (string, error) {
 
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
-func (e *StringEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *StringEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	value, err := e.Value()
 	if err != nil {
 		return nil, err
