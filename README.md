@@ -30,19 +30,19 @@ the following types:
 Entitlements can be initialize with two parameters:
 - `fullName`: a string with the following format `domain-name.identifier[=argument]`
 - `callback`: a entitlement enforcement callback that takes the following arguments:
-  - a security profile honoring the `security_profile.Profile` interface (for now we use the specialized `OciProfile` type)
+  - a security profile honoring the `security_profile.Profile` interface (for now we use the specialized `OCIProfile` type)
   - an entitlement parameter if the entitlement needs one (other than `VoidEntitlement`)
 
 ### Example
 A quick example on how to use entitlements in your container manager:
 ```golang
 /* security_profile.Profile is an abstract interface and
- * security_profile.OciProfile is an implementation with OCI specs config.
+ * security_profile.OCIProfile is an implementation with OCI specs config.
  * We'll add abstract API access management in it. This is the security
  * profile to modify in your entitlement.
  * You should provide your own initialized OCI config to the entitlement manager.
  */
-ociProfile := security_profile.NewOciProfile(OCI_config)
+ociProfile := security_profile.NewOCIProfile(OCI_config)
 
 /* Initialize an entitlement manager which manages entitlements and provide them with
  * an updated security profile
@@ -59,8 +59,8 @@ capSysAdminEntFullName := "security.custom.cap-sys-admin"
  * We can  for example initialize a void entitlement callback which adds the "CAP_SYS_ADMIN"
  * capability to a security profile.
  */
-capSysAdminEntCallback := func (profile secProfile.Profile) (secProfile.Profile, error) {
-    ociProfile, ok := profile.(*secProfile.OciProfile)
+capSysAdminEntCallback := func (profile secprofile.Profile) (secprofile.Profile, error) {
+    ociProfile, ok := profile.(*secprofile.OCIProfile)
     if !ok {
         return nil, fmt.Errorf("%s: error converting to OCI profile", capSysAdminEntFullName)
     }
