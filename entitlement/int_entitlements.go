@@ -13,7 +13,7 @@ import (
 
 // IntEntitlementEnforceCallback should take the security profile to update with the constraints and
 // the entitlement int value as a parameter when being executed
-type IntEntitlementEnforceCallback func(*secprofile.Profile, int64) (*secprofile.Profile, error)
+type IntEntitlementEnforceCallback func(secprofile.Profile, int64) (secprofile.Profile, error)
 
 // IntEntitlement is an entitlement with an explicit int value
 type IntEntitlement struct {
@@ -78,7 +78,7 @@ func (e *IntEntitlement) Value() (string, error) {
 
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement int value
-func (e *IntEntitlement) Enforce(profile *secprofile.Profile) (*secprofile.Profile, error) {
+func (e *IntEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	if e.value == nil || len(e.value) == 0 {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
