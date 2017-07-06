@@ -1,8 +1,6 @@
 package defaults
 
 import (
-	"fmt"
-
 	"github.com/docker/libentitlement/defaults/osdefs"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
@@ -32,13 +30,9 @@ var (
 )
 
 func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", SecurityConfinedEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", SecurityConfinedEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, SecurityConfinedEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToRemove := []string{"CAP_MAC_ADMIN", "CAP_MAC_OVERRIDE", "CAP_DAC_OVERRIDE", "CAP_DAC_READ_SEARCH",
@@ -74,13 +68,9 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 }
 
 func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", SecurityViewEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", SecurityViewEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, SecurityViewEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToRemove := []string{"CAP_SYS_ADMIN", "CAP_SYS_PTRACE", "CAP_SETUID", "CAP_SETGID", "CAP_SETPCAP",
@@ -114,13 +104,9 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 }
 
 func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", SecurityAdminEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", SecurityAdminEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, SecurityAdminEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToAdd := []string{
@@ -139,13 +125,9 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 }
 
 func securityMemoryLockEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", SecurityMemoryLockFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", SecurityMemoryLockFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, SecurityMemoryLockFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToAdd := []string{
