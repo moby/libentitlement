@@ -1,7 +1,6 @@
 package defaults
 
 import (
-	"fmt"
 	"syscall"
 
 	"github.com/docker/libentitlement/entitlement"
