@@ -7,5 +7,5 @@ jobs:
     working_directory: $GOPATH/src/github.com/docker/libentitlement
     steps:
       - checkout
-      - run: go get -u github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
+      - run: go get -u github.com/golang/lint/golint github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
       - run: cd $GOPATH/src/github.com/docker/libentitlement && make test
