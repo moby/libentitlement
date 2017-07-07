@@ -8,4 +8,9 @@ var DefaultEntitlements = map[string]entitlement.Entitlement{
 	NetworkUserEntFullID:  entitlement.Entitlement(networkUserEntitlement),
 	NetworkProxyEntFullID: entitlement.Entitlement(networkProxyEntitlement),
 	NetworkAdminEntFullID: entitlement.Entitlement(networkAdminEntitlement),
+
+	SecurityConfinedEntFullID: entitlement.Entitlement(securityConfinedEntitlement),
+	SecurityViewEntFullID:     entitlement.Entitlement(securityViewEntitlement),
+	SecurityAdminEntFullID:    entitlement.Entitlement(securityAdminEntitlement),
+	SecurityMemoryLockFullID:  entitlement.Entitlement(securityMemoryLockEntitlement),
 }

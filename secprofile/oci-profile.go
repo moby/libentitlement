@@ -1,7 +1,7 @@
 package secprofile
 
 import (
-	specs "github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
 )
 
@@ -96,7 +96,7 @@ func (p *OCIProfile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 
 // AllowSyscallsWithArgs adds seccomp rules to allow syscalls with the given arguments if necessary
 func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]specs.LinuxSeccompArg) {
-	defaultActError := (p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno)
+	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
 
 	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
 
@@ -124,9 +124,20 @@ func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]
 	}
 }
 
+// AllowSyscalls adds seccomp rules to allow a list of syscalls without specific arguments
+func (p *OCIProfile) AllowSyscalls(syscallsToAllow ...string) {
+	syscallsWithNoArgsToAllow := make(map[string][]specs.LinuxSeccompArg)
+	for _, syscallsToAllow := range syscallsToAllow {
+		syscallsWithNoArgsToAllow[syscallsToAllow] = []specs.LinuxSeccompArg{}
+	}
+
+	p.AllowSyscallsWithArgs(syscallsWithNoArgsToAllow)
+}
+
 // BlockSyscallsWithArgs adds seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present
 func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
-	defaultActError := (p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno)
+	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
+
 	/* For each syscall to block we browse each syscall list of each Seccomp rule */
 	for syscallNameToBlock, syscallArgsToBlock := range syscallsWithArgsToBlock {
 		blocked := false
