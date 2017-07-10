@@ -1,7 +1,6 @@
 package defaults
 
 import (
-	"fmt"
 	"syscall"
 
 	"github.com/docker/libentitlement/entitlement"
@@ -41,13 +40,9 @@ var (
  * - Add network namespace
  */
 func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkNoneEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkNoneEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
@@ -93,13 +88,9 @@ func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
  * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
 func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkUserEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkUserEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, NetworkUserEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
@@ -134,13 +125,9 @@ func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
  * 	setsockopt(SO_DEBUG)
  */
 func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkProxyEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkProxyEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, NetworkProxyEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToRemove := []string{"CAP_NET_ADMIN"}
@@ -168,13 +155,9 @@ func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
  * - Authorized caps: CAP_NET_ADMIN, CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  */
 func networkAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if profile.GetType() != secprofile.OCIProfileType {
-		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", NetworkAdminEntFullID)
-	}
-
-	ociProfile, ok := profile.(*secprofile.OCIProfile)
-	if !ok {
-		return nil, fmt.Errorf("%s: error converting to OCI profile", NetworkAdminEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, NetworkAdminEntFullID)
+	if err != nil {
+		return nil, err
 	}
 
 	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}

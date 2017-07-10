@@ -83,16 +83,13 @@ This is as simple as that.
 Default entitlements can be found in `defaults`. They implement the entitlements in the [proposal's table](https://github.com/moby/moby/issues/32801).
 
 Currently implemented:
-- `network.none` as `defaults.NetworkNoneEntitlement`
-- `network.user` as `defaults.NetworkUserEntitlement`
-- `network.proxy` as `defaults.NetworkProxyEntitlement`
-- `network.admin` as `defaults.NetworkAdminEntitlement`
+- `network.none`, `network.user`, `network.proxy`,`network.admin`
+- `security.confined`, `security.view`, `security.admin`, `security.memory-lock`
 
 Missing entitlements:
 - `host.devices.none`, `host.devices.view`, `host.devices.mount`
 - `host.processes.none`, `host.processes.view`, `host.processes.all`
-- `security.none`, `security.view`, `security.admin`, `security.unconfined`,
-  `security.fs-read-only`
+- `security.fs-read-only`
 - `debug`
 
 - resources limits/constraints: TBD
