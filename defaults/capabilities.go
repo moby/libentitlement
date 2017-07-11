@@ -4,7 +4,7 @@ const (
 	// CapAuditControl - Enable and disable kernel auditing; change auditing filter
 	// rules; retrieve auditing status and filtering rules.
 	CapAuditControl = "CAP_AUDIT_CONTROL"
-	
+
 	// CapAuditRead - Allow reading the audit log via a multicast netlink socket.
 	CapAuditRead = "CAP_AUDIT_READ"
 
@@ -149,12 +149,12 @@ const (
 	// * Use vhangupl
 	// * Perform various privileged ioctl operations on TTYs
 	CapSysTtyConfig = "CAP_SYS_TTY_CONFIG"
-	
+
 	// CapSyslog -
 	// * Perform privileged syslog operations
 	// * View kernel addresses exposed via /proc under certain conditions
 	CapSyslog = "CAP_SYSLOG"
-	
+
 	// CapWakeAlarm - trigger something that will wake up the system
 	CapWakeAlarm = "CAP_WAKE_ALARM"
 )

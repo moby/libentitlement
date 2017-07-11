@@ -45,7 +45,7 @@ func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 		return nil, err
 	}
 
-	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW", "CAP_NET_BROADCAST"}
+	capsToRemove := []string{CapNetAdmin, CapNetBindService, CapNetRaw, CapNetBroadcast}
 	ociProfile.RemoveCaps(capsToRemove...)
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
@@ -54,14 +54,14 @@ func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
 	ociProfile.AddNamespaces(nsToAdd...)
 
-	syscallsToBlock := []string{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername",
-		"bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "sendto",
-		"sendmsg", "sendmmsg", "sethostname", "setdomainname",
+	syscallsToBlock := []string{SysSocket, SysSocketpair, SysSetsockopt, SysGetsockopt, SysGetsockname, SysGetpeername,
+		SysBind, SysListen, SysAccept, SysAccept4, SysConnect, SysShutdown, SysRecvfrom, SysRecvmsg, SysRecvmmsg, SysSendto,
+		SysSendmsg, SysSendmmsg, SysSethostname, SysSetdomainname,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
-		"socket": {
+		SysSocket: {
 			{
 				Index: 0,
 				Op:    specs.OpEqualTo,
@@ -93,19 +93,19 @@ func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 		return nil, err
 	}
 
-	capsToRemove := []string{"CAP_NET_ADMIN", "CAP_NET_BIND_SERVICE", "CAP_NET_RAW"}
+	capsToRemove := []string{CapNetAdmin, CapNetBindService, CapNetRaw}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []string{"CAP_NET_BROADCAST"}
+	capsToAdd := []string{CapNetBroadcast}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []string{
-		"sethostname", "setdomainname", "setsockopt",
+		SysSethostname, SysSetdomainname, SysSetsockopt,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
-		"setsockopt": {
+		SysSetsockopt: {
 			{
 				Index: 2,
 				Value: syscall.SO_DEBUG,
@@ -130,14 +130,14 @@ func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	capsToRemove := []string{"CAP_NET_ADMIN"}
+	capsToRemove := []string{CapNetAdmin}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE"}
+	capsToAdd := []string{CapNetBroadcast, CapNetRaw, CapNetBindService}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsWithArgsToBlock := map[string][]specs.LinuxSeccompArg{
-		"setsockopt": {
+		SysSetsockopt: {
 			{
 				Index:    2,
 				Value:    syscall.SO_DEBUG,
@@ -160,7 +160,7 @@ func networkAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	capsToAdd := []string{"CAP_NET_BROADCAST", "CAP_NET_RAW", "CAP_NET_BIND_SERVICE", "CAP_NET_ADMIN"}
+	capsToAdd := []string{CapNetBroadcast, CapNetRaw, CapNetBindService, CapNetAdmin}
 	ociProfile.AddCaps(capsToAdd...)
 
 	return profile, nil
