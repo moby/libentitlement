@@ -99,6 +99,17 @@ func (p *OCIProfile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 	}
 }
 
+// RemoveNamespaces disables a list of namespaces
+func (p *OCIProfile) RemoveNamespaces(nsTypes ...specs.LinuxNamespaceType) {
+	for _, ns := range nsTypes {
+		for index, namespace := range p.OCI.Linux.Namespaces {
+			if namespace.Type == ns {
+				p.OCI.Linux.Namespaces = append(p.OCI.Linux.Namespaces[:index], p.OCI.Linux.Namespaces[index+1:]...)
+			}
+		}
+	}
+}
+
 // AllowSyscallsWithArgs adds seccomp rules to allow syscalls with the given arguments if necessary
 func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[types.Syscall][]specs.LinuxSeccompArg) {
 	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
