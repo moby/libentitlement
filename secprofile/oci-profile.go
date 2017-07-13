@@ -1,6 +1,7 @@
 package secprofile
 
 import (
+	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
 )
@@ -34,28 +35,32 @@ func (p *OCIProfile) GetType() ProfileType {
 }
 
 // AddCaps adds a list of capabilities if not present to all capability masks
-func (p *OCIProfile) AddCaps(capsToAdd ...string) {
+func (p *OCIProfile) AddCaps(capsToAdd ...types.Capability) {
 	for _, cap := range capsToAdd {
-		p.OCI.Process.Capabilities.Bounding = addCapToList(p.OCI.Process.Capabilities.Bounding, cap)
-		p.OCI.Process.Capabilities.Effective = addCapToList(p.OCI.Process.Capabilities.Effective, cap)
-		p.OCI.Process.Capabilities.Inheritable = addCapToList(p.OCI.Process.Capabilities.Inheritable, cap)
-		p.OCI.Process.Capabilities.Permitted = addCapToList(p.OCI.Process.Capabilities.Permitted, cap)
+		capStr := string(cap)
+
+		p.OCI.Process.Capabilities.Bounding = addCapToList(p.OCI.Process.Capabilities.Bounding, capStr)
+		p.OCI.Process.Capabilities.Effective = addCapToList(p.OCI.Process.Capabilities.Effective, capStr)
+		p.OCI.Process.Capabilities.Inheritable = addCapToList(p.OCI.Process.Capabilities.Inheritable, capStr)
+		p.OCI.Process.Capabilities.Permitted = addCapToList(p.OCI.Process.Capabilities.Permitted, capStr)
 
 		// Should be updated automatically if the previous masks are set
-		p.OCI.Process.Capabilities.Ambient = addCapToList(p.OCI.Process.Capabilities.Ambient, cap)
+		p.OCI.Process.Capabilities.Ambient = addCapToList(p.OCI.Process.Capabilities.Ambient, capStr)
 	}
 }
 
 // RemoveCaps removes a list of capabilities if present from all capability masks
-func (p *OCIProfile) RemoveCaps(capsToRemove ...string) {
+func (p *OCIProfile) RemoveCaps(capsToRemove ...types.Capability) {
 	for _, cap := range capsToRemove {
-		p.OCI.Process.Capabilities.Bounding = removeCapFromList(p.OCI.Process.Capabilities.Bounding, cap)
-		p.OCI.Process.Capabilities.Effective = removeCapFromList(p.OCI.Process.Capabilities.Effective, cap)
-		p.OCI.Process.Capabilities.Inheritable = removeCapFromList(p.OCI.Process.Capabilities.Inheritable, cap)
-		p.OCI.Process.Capabilities.Permitted = removeCapFromList(p.OCI.Process.Capabilities.Permitted, cap)
+		capStr := string(cap)
+
+		p.OCI.Process.Capabilities.Bounding = removeCapFromList(p.OCI.Process.Capabilities.Bounding, capStr)
+		p.OCI.Process.Capabilities.Effective = removeCapFromList(p.OCI.Process.Capabilities.Effective, capStr)
+		p.OCI.Process.Capabilities.Inheritable = removeCapFromList(p.OCI.Process.Capabilities.Inheritable, capStr)
+		p.OCI.Process.Capabilities.Permitted = removeCapFromList(p.OCI.Process.Capabilities.Permitted, capStr)
 
 		// Should be updated automatically if the previous masks are set
-		p.OCI.Process.Capabilities.Ambient = removeCapFromList(p.OCI.Process.Capabilities.Ambient, cap)
+		p.OCI.Process.Capabilities.Ambient = removeCapFromList(p.OCI.Process.Capabilities.Ambient, capStr)
 	}
 }
 
@@ -95,16 +100,17 @@ func (p *OCIProfile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 }
 
 // AllowSyscallsWithArgs adds seccomp rules to allow syscalls with the given arguments if necessary
-func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]specs.LinuxSeccompArg) {
+func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[types.Syscall][]specs.LinuxSeccompArg) {
 	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
 
 	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
+		syscallNameToAllowStr := string(syscallNameToAllow)
 
 		for _, syscallRule := range p.OCI.Linux.Seccomp.Syscalls {
 
 			if syscallRule.Action == specs.ActAllow {
 				for _, syscallName := range syscallRule.Names {
-					if syscallName == syscallNameToAllow &&
+					if syscallName == syscallNameToAllowStr &&
 						((len(syscallArgsToAllow) == 0 && len(syscallRule.Args) == 0) ||
 							reflect.DeepEqual(syscallRule.Args, syscallArgsToAllow)) {
 						return
@@ -115,7 +121,7 @@ func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]
 
 		if defaultActError {
 			newRule := specs.LinuxSyscall{
-				Names:  []string{syscallNameToAllow},
+				Names:  []string{syscallNameToAllowStr},
 				Action: specs.ActAllow,
 				Args:   syscallArgsToAllow,
 			}
@@ -125,8 +131,8 @@ func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[string][]
 }
 
 // AllowSyscalls adds seccomp rules to allow a list of syscalls without specific arguments
-func (p *OCIProfile) AllowSyscalls(syscallsToAllow ...string) {
-	syscallsWithNoArgsToAllow := make(map[string][]specs.LinuxSeccompArg)
+func (p *OCIProfile) AllowSyscalls(syscallsToAllow ...types.Syscall) {
+	syscallsWithNoArgsToAllow := make(map[types.Syscall][]specs.LinuxSeccompArg)
 	for _, syscallsToAllow := range syscallsToAllow {
 		syscallsWithNoArgsToAllow[syscallsToAllow] = []specs.LinuxSeccompArg{}
 	}
@@ -135,12 +141,13 @@ func (p *OCIProfile) AllowSyscalls(syscallsToAllow ...string) {
 }
 
 // BlockSyscallsWithArgs adds seccomp rules to block syscalls with the given arguments and remove them from allowed/debug rules if present
-func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]specs.LinuxSeccompArg) {
+func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[types.Syscall][]specs.LinuxSeccompArg) {
 	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
 
 	/* For each syscall to block we browse each syscall list of each Seccomp rule */
 	for syscallNameToBlock, syscallArgsToBlock := range syscallsWithArgsToBlock {
 		blocked := false
+		syscallNameToBlockStr := string(syscallNameToBlock)
 
 		for syscallRuleIndex, syscallRule := range p.OCI.Linux.Seccomp.Syscalls {
 
@@ -148,7 +155,7 @@ func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]
 			case specs.ActAllow, specs.ActTrace, specs.ActTrap:
 				for syscallNameIndex, syscallName := range syscallRule.Names {
 					/* We found the syscall in the syscall list in a rule and arguments are identical */
-					if syscallName == syscallNameToBlock &&
+					if syscallName == syscallNameToBlockStr &&
 						((len(syscallArgsToBlock) == 0 && len(syscallRule.Args) == 0) ||
 							reflect.DeepEqual(syscallRule.Args, syscallArgsToBlock)) {
 
@@ -173,7 +180,7 @@ func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]
 			case specs.ActErrno, specs.ActKill:
 				for _, syscallName := range syscallRule.Names {
 					/* We found the syscall in the syscall list in a rule */
-					if syscallName == syscallNameToBlock {
+					if syscallName == syscallNameToBlockStr {
 						blocked = true
 
 						/* We'll keep looking in next rules outside of this loop as
@@ -189,7 +196,7 @@ func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]
 		/* If we don't find it in a blocking rule, we add one */
 		if !blocked && !defaultActError {
 			newRule := specs.LinuxSyscall{
-				Names:  []string{syscallNameToBlock},
+				Names:  []string{syscallNameToBlockStr},
 				Action: specs.ActErrno,
 				Args:   syscallArgsToBlock,
 			}
@@ -200,8 +207,8 @@ func (p *OCIProfile) BlockSyscallsWithArgs(syscallsWithArgsToBlock map[string][]
 }
 
 // BlockSyscalls blocks a list of syscalls without specific arguments
-func (p *OCIProfile) BlockSyscalls(syscallsToBlock ...string) {
-	syscallsWithNoArgsToBlock := make(map[string][]specs.LinuxSeccompArg)
+func (p *OCIProfile) BlockSyscalls(syscallsToBlock ...types.Syscall) {
+	syscallsWithNoArgsToBlock := make(map[types.Syscall][]specs.LinuxSeccompArg)
 	for _, syscallsToBlock := range syscallsToBlock {
 		syscallsWithNoArgsToBlock[syscallsToBlock] = []specs.LinuxSeccompArg{}
 	}

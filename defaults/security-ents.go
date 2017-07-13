@@ -4,6 +4,7 @@ import (
 	"github.com/docker/libentitlement/defaults/osdefs"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
@@ -35,19 +36,19 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 		return nil, err
 	}
 
-	capsToRemove := []string{"CAP_MAC_ADMIN", "CAP_MAC_OVERRIDE", "CAP_DAC_OVERRIDE", "CAP_DAC_READ_SEARCH",
-		"CAP_SETPCAP", "CAP_SETFCAP", "CAP_SETUID", "CAP_SETGID", "CAP_SYS_PTRACE", "CAP_FSETID", "CAP_SYS_MODULE",
-		"CAP_SYSLOG", "CAP_SYS_RAWIO", "CAP_SYS_ADMIN", "CAP_LINUX_IMMUTABLE",
+	capsToRemove := []types.Capability{
+		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetfcap, CapSetfcap, CapSetuid, CapSetgid,
+		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	syscallsToBlock := []string{"ptrace", "arch_prctl", "personality", "setuid", "setgid", "prctl",
-		"madvise",
+	syscallsToBlock := []types.Syscall{
+		SysPtrace, SysArchPrctl, SysPersonality, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
-	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
-		"prctl": {
+	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
+		SysPrctl: {
 			{
 				Index: 0,
 				Value: osdefs.PrCapbsetDrop,
@@ -73,22 +74,22 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	capsToRemove := []string{"CAP_SYS_ADMIN", "CAP_SYS_PTRACE", "CAP_SETUID", "CAP_SETGID", "CAP_SETPCAP",
-		"CAP_SETFCAP", "CAP_MAC_ADMIN", "CAP_MAC_OVERRIDE", "CAP_DAC_OVERRIDE", "CAP_FSETID",
-		"CAP_SYS_MODULE", "CAP_SYSLOG", "CAP_SYS_RAWIO", "CAP_LINUX_IMMUTABLE",
+	capsToRemove := []types.Capability{
+		CapSysAdmin, CapSysPtrace, CapSetuid, CapSetgid, CapSetpcap, CapSetfcap, CapMacAdmin, CapMacOverride,
+		CapDacOverride, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []string{"CAP_DAC_READ_SEARCH"}
+	capsToAdd := []types.Capability{CapDacReadSearch}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToBlock := []string{"ptrace", "arch_prctl", "personality", "setuid", "setgid", "prctl",
-		"madvise",
+	syscallsToBlock := []types.Syscall{
+		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
-	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
-		"prctl": {
+	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
+		SysPrctl: {
 			{
 				Index: 0,
 				Value: osdefs.PrCapbsetDrop,
@@ -109,15 +110,14 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 		return nil, err
 	}
 
-	capsToAdd := []string{
-		"CAP_MAC_ADMIN", "CAP_MAC_OVERRIDE", "CAP_DAC_OVERRIDE", "CAP_DAC_READ_SEARCH",
-		"CAP_SETPCAP", "CAP_SETFCAP", "CAP_SETUID", "CAP_SETGID", "CAP_SYS_PTRACE", "CAP_FSETID", "CAP_SYS_MODULE",
-		"CAP_SYSLOG", "CAP_SYS_RAWIO", "CAP_SYS_ADMIN", "CAP_LINUX_IMMUTABLE",
+	capsToAdd := []types.Capability{
+		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
+		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToAllow := []string{"ptrace", "arch_prctl", "personality", "setuid", "setgid", "prctl",
-		"madvise",
+	syscallsToAllow := []types.Syscall{
+		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 
@@ -130,13 +130,13 @@ func securityMemoryLockEnforce(profile secprofile.Profile) (secprofile.Profile, 
 		return nil, err
 	}
 
-	capsToAdd := []string{
-		"CAP_IPC_LOCK",
+	capsToAdd := []types.Capability{
+		CapIpcLock,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToAllow := []string{
-		"mlock", "munlock", "mlock2", "mlockall", "munlockall",
+	syscallsToAllow := []types.Syscall{
+		SysMlock, SysMunlock, SysMlock2, SysMlockall, SysMunlockall,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 
