@@ -4,6 +4,7 @@ import (
 	"github.com/docker/libentitlement/defaults/osdefs"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
@@ -35,18 +36,18 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 		return nil, err
 	}
 
-	capsToRemove := []string{
+	capsToRemove := []types.Capability{
 		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetfcap, CapSetfcap, CapSetuid, CapSetgid,
 		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	syscallsToBlock := []string{
+	syscallsToBlock := []types.Syscall{
 		SysPtrace, SysArchPrctl, SysPersonality, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
-	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
+	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
 		SysPrctl: {
 			{
 				Index: 0,
@@ -73,21 +74,21 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	capsToRemove := []string{
+	capsToRemove := []types.Capability{
 		CapSysAdmin, CapSysPtrace, CapSetuid, CapSetgid, CapSetpcap, CapSetfcap, CapMacAdmin, CapMacOverride,
 		CapDacOverride, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []string{CapDacReadSearch}
+	capsToAdd := []types.Capability{CapDacReadSearch}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToBlock := []string{
+	syscallsToBlock := []types.Syscall{
 		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
-	syscallsWithArgsToAllow := map[string][]specs.LinuxSeccompArg{
+	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
 		SysPrctl: {
 			{
 				Index: 0,
@@ -109,13 +110,13 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 		return nil, err
 	}
 
-	capsToAdd := []string{
+	capsToAdd := []types.Capability{
 		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
 		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToAllow := []string{
+	syscallsToAllow := []types.Syscall{
 		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
@@ -129,12 +130,12 @@ func securityMemoryLockEnforce(profile secprofile.Profile) (secprofile.Profile, 
 		return nil, err
 	}
 
-	capsToAdd := []string{
+	capsToAdd := []types.Capability{
 		CapIpcLock,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
-	syscallsToAllow := []string{
+	syscallsToAllow := []types.Syscall{
 		SysMlock, SysMunlock, SysMlock2, SysMlockall, SysMunlockall,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)

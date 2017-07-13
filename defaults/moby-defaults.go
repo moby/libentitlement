@@ -1,8 +1,12 @@
 package defaults
 
+import (
+	"github.com/docker/libentitlement/types"
+)
+
 var (
 	// MobyDefaultCaps is the default set of capabilities on Moby
-	MobyDefaultCaps = map[string]bool{
+	MobyDefaultCaps = map[types.Capability]bool{
 		CapChown:          true,
 		CapDacOverride:    true,
 		CapFsetid:         true,
