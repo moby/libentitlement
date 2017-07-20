@@ -5,6 +5,7 @@ import (
 	"github.com/docker/libentitlement/secprofile"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/docker/libentitlement/types"
+	"reflect"
 )
 
 const (
@@ -33,6 +34,57 @@ var (
 	hostProcessesAdminEntitlement = entitlement.NewVoidEntitlement(HostProcessesAdminEntFullID, hostProcessesAdminEntitlementEnforce)
 )
 
+var (
+	allowedMounts = []specs.Mount {
+		{
+			Destination: "/proc",
+			Type:        "proc",
+			Source:      "proc",
+			Options:     []string{"nosuid", "noexec", "nodev"},
+		},
+		{
+			Destination: "/dev",
+			Type:        "tmpfs",
+			Source:      "tmpfs",
+			Options:     []string{"nosuid", "strictatime", "mode=755"},
+		},
+		{
+			Destination: "/dev/pts",
+			Type:        "devpts",
+			Source:      "devpts",
+			Options:     []string{"nosuid", "noexec", "newinstance", "ptmxmode=0666", "mode=0620", "gid=5"},
+		},
+		{
+			Destination: "/sys",
+			Type:        "sysfs",
+			Source:      "sysfs",
+			Options:     []string{"nosuid", "noexec", "nodev", "ro"},
+		},
+		{
+			Destination: "/sys/fs/cgroup",
+			Type:        "cgroup",
+			Source:      "cgroup",
+			Options:     []string{"ro", "nosuid", "noexec", "nodev"},
+		},
+		{
+			Destination: "/dev/mqueue",
+			Type:        "mqueue",
+			Source:      "mqueue",
+			Options:     []string{"nosuid", "noexec", "nodev"},
+		},
+	}
+)
+
+func isAllowedMount(mount specs.Mount) bool {
+	for _, allowedMount := range allowedMounts {
+		if reflect.DeepEqual(mount, allowedMount) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesNoneEntFullID)
 	if err != nil {
@@ -50,12 +102,11 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, "/sys")
 	ociProfile.OCI.Linux.MaskedPaths = append(ociProfile.OCI.Linux.MaskedPaths, "/proc/kcore")
 
-	ociProfile.OCI.Mounts = []specs.Mount{}
+	ociProfile.OCI.Mounts = allowedMounts
 
 	return ociProfile, nil
 }
 
-// FIXME: Not implemented yet
 func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesViewEntFullID)
 	if err != nil {
@@ -64,7 +115,10 @@ func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 
 	for _, mount := range ociProfile.OCI.Mounts {
 		mountPath := mount.Destination
-		ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, mountPath)
+
+		if !isAllowedMount(mount) {
+			ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, mountPath)
+		}
 	}
 
 	return ociProfile, nil
