@@ -1,10 +1,11 @@
 package apparmor
 
 import (
-	"github.com/moby/moby/pkg/templates"
 	"io"
 	"os"
 	"path"
+
+	"github.com/docker/libentitlement/templates"
 )
 
 var (
