@@ -3,8 +3,8 @@ package defaults
 import (
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
-	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/docker/libentitlement/types"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
 )
 
@@ -12,30 +12,34 @@ const (
 	hostDomain = "host"
 
 	hostProcessesDomain = hostDomain + ".process"
-	hostDevicesDomain = hostDomain + ".device"
+	hostDevicesDomain   = hostDomain + ".device"
 )
 
 const (
+	// HostDevicesNoneEntFullID is the ID for the host.devices.none entitlement
 	HostDevicesNoneEntFullID = hostDevicesDomain + ".none"
+	// HostDevicesViewEntFullID is the ID for the host.devices.view entitlement
 	HostDevicesViewEntFullID = hostDevicesDomain + ".view"
+	// HostDevicesAdminEntFullID is the ID for the host.devices.admin entitlement
 	HostDevicesAdminEntFullID = hostDevicesDomain + ".admin"
 
+	// HostProcessesNoneEntFullID is the ID for the host.processes.none entitlement
 	HostProcessesNoneEntFullID = hostProcessesDomain + ".none"
-	HostProcessesViewEntFullID = hostProcessesDomain + ".view"
+	// HostProcessesAdminEntFullID is the ID for the host.processes.admin entitlement
 	HostProcessesAdminEntFullID = hostProcessesDomain + ".admin"
 )
 
 var (
-	hostDevicesNoneEntitlement = entitlement.NewVoidEntitlement(HostDevicesNoneEntFullID, hostDevicesNoneEntitlementEnforce)
-	hostDevicesViewEntitlement = entitlement.NewVoidEntitlement(HostDevicesViewEntFullID, hostDevicesViewEntitlementEnforce)
+	hostDevicesNoneEntitlement  = entitlement.NewVoidEntitlement(HostDevicesNoneEntFullID, hostDevicesNoneEntitlementEnforce)
+	hostDevicesViewEntitlement  = entitlement.NewVoidEntitlement(HostDevicesViewEntFullID, hostDevicesViewEntitlementEnforce)
 	hostDevicesAdminEntitlement = entitlement.NewVoidEntitlement(HostDevicesAdminEntFullID, hostDevicesAdminEntitlementEnforce)
 
-	hostProcessesNoneEntitlement = entitlement.NewVoidEntitlement(HostProcessesNoneEntFullID, hostProcessesNoneEntitlementEnforce)
+	hostProcessesNoneEntitlement  = entitlement.NewVoidEntitlement(HostProcessesNoneEntFullID, hostProcessesNoneEntitlementEnforce)
 	hostProcessesAdminEntitlement = entitlement.NewVoidEntitlement(HostProcessesAdminEntFullID, hostProcessesAdminEntitlementEnforce)
 )
 
 var (
-	allowedMounts = []specs.Mount {
+	allowedMounts = []specs.Mount{
 		{
 			Destination: "/proc",
 			Type:        "proc",
@@ -134,6 +138,8 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 		CapSysAdmin,
 	}
 	ociProfile.AddCaps(capsToAdd...)
+
+	return ociProfile, nil
 }
 
 func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {

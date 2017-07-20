@@ -1,8 +1,8 @@
 package apparmor
 
 import (
-	"io"
 	"github.com/moby/moby/pkg/templates"
+	"io"
 	"os"
 	"path"
 )
@@ -16,30 +16,28 @@ type networkRawSetup struct {
 	Denied bool
 }
 
-/* See http://manpages.ubuntu.com/manpages/precise/man5/apparmor.d.5.html
- * for more information regarding supported protocols, network data types
- * and domains.
- */
+/*
+NetworkSetup contains flags and data to configure network rules in AppArmor.
+See http://manpages.ubuntu.com/manpages/precise/man5/apparmor.d.5.html
+for more information regarding supported protocols, network data types
+and domains.
+*/
 type NetworkSetup struct {
-	/* AllowedProtocols can be one of the following:
-	 * 'tcp', 'udp', 'icmp'
-	 */
 	AllowedProtocols []string
-	Raw networkRawSetup
+	Raw              networkRawSetup
 }
 
+/*
+CapabilitiesSetup contains flags and data to configure capability rules in AppArmor.
+See http://manpages.ubuntu.com/manpages/precise/man5/apparmor.d.5.html
+for more information regarding supported capabilities.
+*/
 type CapabilitiesSetup struct {
-	/* Currently supported capabilities are:
-	 * "chown", "dac_override", "dac_read_search", "fowner", "fsetid", "kill", "setgid", "setuid", "setpcap",
-     * "linux_immutable", "net_bind_service", "net_broadcast", "net_admin", "net_raw", "ipc_lock", "ipc_owner",
-     * "sys_module", "sys_rawio", "sys_chroot", "sys_ptrace", "sys_pacct", "sys_admin", "sys_boot", "sys_nice",
-     * "sys_resource", "sys_time", "sys_tty_config", "mknod", "lease", "audit_write", "audit_control", "setfcap",
-     * "mac_override", "mac_admin"
-	 */
 	Allowed []string
-	Denied []string
+	Denied  []string
 }
 
+// FilesSetup contains data to configure filesystem access rules in AppArmor.
 type FilesSetup struct {
 	// Denied is a list of filepaths to deny any access to
 	Denied []string
@@ -49,7 +47,7 @@ type FilesSetup struct {
 	NoExec []string
 }
 
-// profileData holds information about the given profile for generation.
+// ProfileData holds information about the given profile for generation.
 type ProfileData struct {
 	// Name is profile name.
 	Name string
@@ -70,6 +68,7 @@ type ProfileData struct {
 	Files FilesSetup
 }
 
+// NewProfileData creates an ProfileData object with its name.
 func NewProfileData(name string) *ProfileData {
 	return &ProfileData{Name: name}
 }
@@ -98,10 +97,10 @@ func generateAppArmorProfile(p ProfileData, out io.Writer) error {
 
 	// FIXME: add `aaparser` pkg
 	/*
-	ver, err := aaparser.GetVersion()
-	if err != nil {
-		return err
-	}
+		ver, err := aaparser.GetVersion()
+		if err != nil {
+			return err
+		}
 	*/
 
 	return aaProfile.Execute(out, p)

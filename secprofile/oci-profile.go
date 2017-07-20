@@ -1,9 +1,9 @@
 package secprofile
 
 import (
+	"github.com/docker/libentitlement/apparmor"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"github.com/docker/libentitlement/apparmor"
 	"reflect"
 )
 
@@ -16,7 +16,7 @@ var OCIProfileType = ProfileType("oci-profile")
 // FIXME: Add error handling here if profile or subfields are not allocated */
 // Fixme add api access settings for Engine / Swarm / K8s?
 type OCIProfile struct {
-	OCI      *specs.Spec
+	OCI           *specs.Spec
 	AppArmorSetup *apparmor.ProfileData
 }
 
