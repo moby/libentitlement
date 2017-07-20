@@ -6,7 +6,7 @@ package apparmor
  */
 const baseCustomTemplate = `
 {{range $value := .Imports}}
-{{$value}}
+  {{$value}}
 {{end}}
 
 profile {{.Name}} flags=(attach_disconnected,mediate_deleted) {
@@ -15,24 +15,31 @@ profile {{.Name}} flags=(attach_disconnected,mediate_deleted) {
 {{end}}
 
 {{if .Network.Denied}}
-  deny network
-{{end}} {{else}}
+  deny network,
+{{else}}
   {{if .Network.AllowedProtocols}}
-    {{range $value := .Network.AllowedProtocols}} network inet {{$value}}
-  {{end}} {{else}}
+    {{range $value := .Network.AllowedProtocols}} network inet {{$value}},
+    {{end}}
+  {{else}}
     network,
   {{end}}
+
   {{if .Network.Raw.Denied}}
     deny network raw,
   {{end}}
 {{end}}
 
-{{range $value := .Capabilities.Allowed}} capabilty {{$value}}
-{{range $value := .Capabilities.Denied}} deny capability {{$value}}
+{{range $value := .Capabilities.Allowed}} capabilty {{$value}},
+{{end}}
+{{range $value := .Capabilities.Denied}} deny capability {{$value}},
+{{end}}
 
-{{range $value := .Files.Denied}} deny {{$value}} rwamklx
-{{range $value := .Files.ReadOnly}} deny {{$value}} wkal
-{{range $value := .Files.NoExec}} deny {{$value}} x
+{{range $value := .Files.Denied}} deny {{$value}} rwamklx,
+{{end}}
+{{range $value := .Files.ReadOnly}} deny {{$value}} wkal,
+{{end}}
+{{range $value := .Files.NoExec}} deny {{$value}} x,
+{{end}}
 
   file,
   umount,

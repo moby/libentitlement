@@ -24,6 +24,7 @@ for more information regarding supported protocols, network data types
 and domains.
 */
 type NetworkSetup struct {
+	Denied           bool
 	AllowedProtocols []string
 	Raw              networkRawSetup
 }
@@ -80,7 +81,8 @@ func macroExists(m string) bool {
 	return err == nil
 }
 
-func generateAppArmorProfile(p ProfileData, out io.Writer) error {
+// GenerateAppArmorProfile creates an AppArmor profile and writes it to the io.Writer argument
+func GenerateAppArmorProfile(p ProfileData, out io.Writer) error {
 	aaProfile, err := templates.NewParse("apparmor_profile", baseCustomTemplate)
 	if err != nil {
 		return err
