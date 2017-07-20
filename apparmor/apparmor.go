@@ -20,7 +20,7 @@ type networkRawSetup struct {
  * for more information regarding supported protocols, network data types
  * and domains.
  */
-type networkSetup struct {
+type NetworkSetup struct {
 	/* AllowedProtocols can be one of the following:
 	 * 'tcp', 'udp', 'icmp'
 	 */
@@ -28,7 +28,7 @@ type networkSetup struct {
 	Raw networkRawSetup
 }
 
-type capabilitiesSetup struct {
+type CapabilitiesSetup struct {
 	/* Currently supported capabilities are:
 	 * "chown", "dac_override", "dac_read_search", "fowner", "fsetid", "kill", "setgid", "setuid", "setpcap",
      * "linux_immutable", "net_bind_service", "net_broadcast", "net_admin", "net_raw", "ipc_lock", "ipc_owner",
@@ -40,7 +40,7 @@ type capabilitiesSetup struct {
 	Denied []string
 }
 
-type filesSetup struct {
+type FilesSetup struct {
 	// Denied is a list of filepaths to deny any access to
 	Denied []string
 	// ReadOnly is a list of filepaths to restrict to read access only
@@ -50,7 +50,7 @@ type filesSetup struct {
 }
 
 // profileData holds information about the given profile for generation.
-type profileData struct {
+type ProfileData struct {
 	// Name is profile name.
 	Name string
 	// Imports defines the apparmor functions to import, before defining the profile.
@@ -61,13 +61,17 @@ type profileData struct {
 	Version int
 
 	// Network defines the network setup we want, see NetworkSetup type definition
-	Network networkSetup
+	Network NetworkSetup
 
 	// Capabilities defines the capabilities setup we want, see CapabiltitiesSetup type definition
-	Capabilities capabilitiesSetup
+	Capabilities CapabilitiesSetup
 
 	// Files defines the files access setup we want, see FilesSetup type definition
-	Files filesSetup
+	Files FilesSetup
+}
+
+func NewProfileData(name string) *ProfileData {
+	return &ProfileData{Name: name}
 }
 
 // macrosExists checks if the passed macro exists.
@@ -76,7 +80,7 @@ func macroExists(m string) bool {
 	return err == nil
 }
 
-func generateAppArmorProfile(p profileData, out io.Writer) error {
+func generateAppArmorProfile(p ProfileData, out io.Writer) error {
 	aaProfile, err := templates.NewParse("apparmor_profile", baseCustomTemplate)
 	if err != nil {
 		return err

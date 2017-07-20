@@ -4,6 +4,7 @@ import (
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
 	"github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/docker/libentitlement/types"
 )
 
 const (
@@ -38,15 +39,35 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 		return nil, err
 	}
 
+	capsToRemove := []types.Capability{
+		CapSysAdmin,
+	}
+	ociProfile.RemoveCaps(capsToRemove...)
 
+	ociProfile.AppArmorSetup.Files.ReadOnly = append(ociProfile.AppArmorSetup.Files.ReadOnly, "/sys/**")
+	ociProfile.AppArmorSetup.Files.Denied = append(ociProfile.AppArmorSetup.Files.Denied, "/proc/kcore/**")
+
+	ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, "/sys")
+	ociProfile.OCI.Linux.MaskedPaths = append(ociProfile.OCI.Linux.MaskedPaths, "/proc/kcore")
+
+	ociProfile.OCI.Mounts = []specs.Mount{}
+
+	return ociProfile, nil
 }
 
+// FIXME: Not implemented yet
 func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesViewEntFullID)
 	if err != nil {
 		return nil, err
 	}
 
+	for _, mount := range ociProfile.OCI.Mounts {
+		mountPath := mount.Destination
+		ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, mountPath)
+	}
+
+	return ociProfile, nil
 }
 
 func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
@@ -55,7 +76,10 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 		return nil, err
 	}
 
-
+	capsToAdd := []types.Capability{
+		CapSysAdmin,
+	}
+	ociProfile.AddCaps(capsToAdd...)
 }
 
 func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {

@@ -3,16 +3,12 @@ package secprofile
 import (
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/docker/libentitlement/apparmor"
 	"reflect"
 )
 
 // OCIProfileType is an identifier for an OCI profile
 var OCIProfileType = ProfileType("oci-profile")
-
-// AppArmorProfile is a set of AppArmor rules
-type AppArmorProfile struct {
-	Rules []string
-}
 
 // OCIProfile maintains some OCI spec settings but should also contain a complete security
 // context.
@@ -21,12 +17,12 @@ type AppArmorProfile struct {
 // Fixme add api access settings for Engine / Swarm / K8s?
 type OCIProfile struct {
 	OCI      *specs.Spec
-	AppArmor *AppArmorProfile
+	AppArmorSetup *apparmor.ProfileData
 }
 
 // NewOCIProfile instantiates an OCIProfile object with an OCI specification structure
-func NewOCIProfile(ociSpec *specs.Spec) *OCIProfile {
-	return &OCIProfile{OCI: ociSpec}
+func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile {
+	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewProfileData(apparmorProfileName)}
 }
 
 // GetType returns the OCI profile type identifier

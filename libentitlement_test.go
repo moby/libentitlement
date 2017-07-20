@@ -42,7 +42,7 @@ func testSpec() *specs.Spec {
 
 func TestRegisterDummyEntitlement(t *testing.T) {
 	spec := testSpec()
-	profile := secprofile.NewOCIProfile(spec)
+	profile := secprofile.NewOCIProfile(spec, "dummy-profile-default")
 
 	entMgr := NewEntitlementsManager(profile)
 
