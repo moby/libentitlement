@@ -11,8 +11,8 @@ import (
 const (
 	hostDomain = "host"
 
-	hostProcessesDomain = hostDomain + ".process"
-	hostDevicesDomain   = hostDomain + ".device"
+	hostProcessesDomain = hostDomain + ".processes"
+	hostDevicesDomain   = hostDomain + ".devices"
 )
 
 const (
@@ -128,11 +128,37 @@ func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	return ociProfile, nil
 }
 
+func removeReadOnlyFlagMount(mount specs.Mount) specs.Mount {
+	readWriteMount := mount
+	for index, option := range readWriteMount.Options {
+		if option == "ro" {
+			readWriteMount.Options = append(readWriteMount.Options[:index], readWriteMount.Options[index+1:]...)
+			break
+		}
+	}
+
+	return readWriteMount
+}
+
+func removeReadOnlyFlagMounts(mounts []specs.Mount) []specs.Mount {
+	readWriteMounts := make([]specs.Mount, len(mounts))
+
+	for mountIndex, mount := range mounts {
+		readWriteMounts[mountIndex] = removeReadOnlyFlagMount(mount)
+	}
+
+	return readWriteMounts
+}
+
 func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesAdminEntFullID)
 	if err != nil {
 		return nil, err
 	}
+
+	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(allowedMounts)
+
+	ociProfile.OCI.Linux.MaskedPaths = []string{}
 
 	capsToAdd := []types.Capability{
 		CapSysAdmin,

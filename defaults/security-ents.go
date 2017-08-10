@@ -37,13 +37,17 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	}
 
 	capsToRemove := []types.Capability{
-		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetfcap, CapSetfcap, CapSetuid, CapSetgid,
+		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
 		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
 	syscallsToBlock := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
+		SysPtrace, SysArchPrctl, SysPersonality,
+		// SysSetuid,
+		// SysSetgid,
+		// SysPrctl,
+		SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
@@ -75,7 +79,9 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	}
 
 	capsToRemove := []types.Capability{
-		CapSysAdmin, CapSysPtrace, CapSetuid, CapSetgid, CapSetpcap, CapSetfcap, CapMacAdmin, CapMacOverride,
+		CapSysAdmin, CapSysPtrace,
+		CapSetuid, CapSetgid, CapSetpcap, CapSetfcap,
+		CapMacAdmin, CapMacOverride,
 		CapDacOverride, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
@@ -84,7 +90,12 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
+		SysPtrace,
+		// SysArchPrctl,
+		SysPersonality, // TODO: Block NO_RANDOMIZE, COMPAT_LAYOUT args etc..
+		// SysSetuid, SysSetgid,
+		// SysPrctl,
+		SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
@@ -112,14 +123,18 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 
 	capsToAdd := []types.Capability{
 		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
-		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
+		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable, CapSysBoot,
+		CapSysNice, CapSysPacct, CapSysTtyConfig, CapSysTime, CapWakeAlarm,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToAllow := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise,
+		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise, SysMount, SysInitModule,
+		SysFinitModule, SysSetns, SysClone, SysUnshare,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
+
+	ociProfile.OCI.Linux.ReadonlyPaths = []string{}
 
 	return ociProfile, nil
 }

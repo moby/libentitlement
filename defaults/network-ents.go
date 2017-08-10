@@ -97,24 +97,24 @@ func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 	capsToRemove := []types.Capability{CapNetAdmin, CapNetBindService, CapNetRaw}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []types.Capability{CapNetBroadcast}
-	ociProfile.AddCaps(capsToAdd...)
+	//syscallsToBlock := []types.Syscall{
+	//	SysSethostname, SysSetdomainname, SysSetsockopt,
+	//}
+	//ociProfile.BlockSyscalls(syscallsToBlock...)
+	//
+	//syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
+	//	SysSetsockopt: {
+	//		{
+	//			Index: 2,
+	//			Value: syscall.SO_DEBUG,
+	//			Op:    specs.OpNotEqual,
+	//		},
+	//	},
+	//}
+	//ociProfile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
-	syscallsToBlock := []types.Syscall{
-		SysSethostname, SysSetdomainname, SysSetsockopt,
-	}
-	ociProfile.BlockSyscalls(syscallsToBlock...)
-
-	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
-		SysSetsockopt: {
-			{
-				Index: 2,
-				Value: syscall.SO_DEBUG,
-				Op:    specs.OpNotEqual,
-			},
-		},
-	}
-	ociProfile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
+	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
+	ociProfile.AddNamespaces(nsToAdd...)
 
 	return profile, nil
 }
@@ -134,7 +134,7 @@ func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	capsToRemove := []types.Capability{CapNetAdmin}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []types.Capability{CapNetBroadcast, CapNetRaw, CapNetBindService}
+	capsToAdd := []types.Capability{CapNetRaw, CapNetBindService}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsWithArgsToBlock := map[types.Syscall][]specs.LinuxSeccompArg{
@@ -149,6 +149,9 @@ func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	}
 	ociProfile.BlockSyscallsWithArgs(syscallsWithArgsToBlock)
 
+	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
+	ociProfile.AddNamespaces(nsToAdd...)
+
 	return profile, nil
 }
 
@@ -161,7 +164,7 @@ func networkAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	capsToAdd := []types.Capability{CapNetBroadcast, CapNetRaw, CapNetBindService, CapNetAdmin}
+	capsToAdd := []types.Capability{CapNetAdmin, CapNetRaw, CapNetBindService, CapNetBroadcast}
 	ociProfile.AddCaps(capsToAdd...)
 
 	return profile, nil
