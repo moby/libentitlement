@@ -89,6 +89,12 @@ func isAllowedMount(mount specs.Mount) bool {
 	return false
 }
 
+/* Implements "host.devices.none" entitlement
+ * - Blocked Capabilities: CAP_SYS_ADMIN
+ * - Sets all files in sysfs as read-only
+ * - Prevents access to files under /proc/kcore
+ * - Sets allowed mounts with associated mount options to Moby defaults
+ */
 func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesNoneEntFullID)
 	if err != nil {
@@ -111,6 +117,9 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	return ociProfile, nil
 }
 
+/* Implements "host.devices.view" entitlement
+ * - Sets all custom mounts to read-only
+ */
 func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesViewEntFullID)
 	if err != nil {
@@ -150,6 +159,11 @@ func removeReadOnlyFlagMounts(mounts []specs.Mount) []specs.Mount {
 	return readWriteMounts
 }
 
+/* Implements "host.devices.admin" entitlement
+ * - Allowed Capabilities: CAP_SYS_ADMIN
+ * - Sets all mounts as Read-Write
+ * - No paths masked to the container
+ */
 func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesAdminEntFullID)
 	if err != nil {
@@ -168,6 +182,9 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	return ociProfile, nil
 }
 
+/* Implements "host.processes.none" entitlement
+ * - Activates User Namespace
+ */
 func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostProcessesNoneEntFullID)
 	if err != nil {
@@ -182,6 +199,9 @@ func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile
 	return ociProfile, nil
 }
 
+/* Implements "host.processes.admin" entitlement
+ * - Deactivates User Namespace
+ */
 func hostProcessesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostProcessesAdminEntFullID)
 	if err != nil {
