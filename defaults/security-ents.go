@@ -127,6 +127,7 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 
+	// Just in case some default configuration does add read-only paths, we remove them
 	ociProfile.OCI.Linux.ReadonlyPaths = []string{}
 
 	return ociProfile, nil

@@ -75,7 +75,7 @@ type ProfileData struct {
 	Files FilesSetup
 }
 
-// NewProfileData creates an empty ProfileData object with its name.
+// NewEmptyProfileData creates an empty ProfileData object with its name.
 func NewEmptyProfileData(name string) *ProfileData {
 	return &ProfileData{Name: name}
 }

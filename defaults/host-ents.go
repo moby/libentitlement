@@ -137,6 +137,7 @@ func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	return ociProfile, nil
 }
 
+// removeReadOnlyFlagMounts removes the read-only "ro" flag from a mount object's mount options
 func removeReadOnlyFlagMount(mount specs.Mount) specs.Mount {
 	readWriteMount := mount
 	for index, option := range readWriteMount.Options {
@@ -149,6 +150,7 @@ func removeReadOnlyFlagMount(mount specs.Mount) specs.Mount {
 	return readWriteMount
 }
 
+// removeReadOnlyFlagMounts removes the read-only "ro" flag from mount options of a provided list of mounts
 func removeReadOnlyFlagMounts(mounts []specs.Mount) []specs.Mount {
 	readWriteMounts := make([]specs.Mount, len(mounts))
 
@@ -161,7 +163,7 @@ func removeReadOnlyFlagMounts(mounts []specs.Mount) []specs.Mount {
 
 /* Implements "host.devices.admin" entitlement
  * - Allowed Capabilities: CAP_SYS_ADMIN
- * - Sets all mounts as Read-Write
+ * - Sets mounts as Read-Write
  * - No paths masked to the container
  */
 func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
@@ -170,6 +172,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 		return nil, err
 	}
 
+	// FIXME: just remove read-only flags for default mounts and leave additional mounts as is
 	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(allowedMounts)
 
 	ociProfile.OCI.Linux.MaskedPaths = []string{}

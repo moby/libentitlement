@@ -27,7 +27,7 @@ func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile 
 		return &OCIProfile{OCI: ociSpec, AppArmorSetup: nil}
 	}
 
-	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewProfileData(apparmorProfileName)}
+	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewEmptyProfileData(apparmorProfileName)}
 }
 
 // GetType returns the OCI profile type identifier
