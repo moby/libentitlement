@@ -8,9 +8,14 @@ import (
 	"github.com/docker/libentitlement/templates"
 )
 
+const (
+	// defaultProfileDirectory is the apparmor default profile's directory
+	defaultProfileDirectory = "/etc/apparmor.d"
+)
+
 var (
 	// profileDirectory is the file store for apparmor profiles and macros.
-	profileDirectory = "/etc/apparmor.d"
+	profileDirectory = defaultProfileDirectory
 )
 
 type networkRawSetup struct {
@@ -79,6 +84,11 @@ func NewProfileData(name string) *ProfileData {
 func macroExists(m string) bool {
 	_, err := os.Stat(path.Join(profileDirectory, m))
 	return err == nil
+}
+
+// SetAppArmorProfileDirectory sets AppArmor's profile directory
+func SetAppArmorProfileDirectory(path string) {
+	profileDirectory = path
 }
 
 // GenerateAppArmorProfile creates an AppArmor profile and writes it to the io.Writer argument

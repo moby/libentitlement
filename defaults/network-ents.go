@@ -85,8 +85,6 @@ func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 /* Implements "network.user" entitlement
  * - No caps: CAP_NET_ADMIN, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  * - Authorized caps: CAP_NET_BROADCAST
- * - Blocked syscalls:
- * 	sethostname, setdomainname, setsockopt(SO_DEBUG)
  */
 func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, NetworkUserEntFullID)
@@ -96,22 +94,6 @@ func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 
 	capsToRemove := []types.Capability{CapNetAdmin, CapNetBindService, CapNetRaw}
 	ociProfile.RemoveCaps(capsToRemove...)
-
-	//syscallsToBlock := []types.Syscall{
-	//	SysSethostname, SysSetdomainname, SysSetsockopt,
-	//}
-	//ociProfile.BlockSyscalls(syscallsToBlock...)
-	//
-	//syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
-	//	SysSetsockopt: {
-	//		{
-	//			Index: 2,
-	//			Value: syscall.SO_DEBUG,
-	//			Op:    specs.OpNotEqual,
-	//		},
-	//	},
-	//}
-	//ociProfile.AllowSyscallsWithArgs(syscallsWithArgsToAllow)
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
 	ociProfile.AddNamespaces(nsToAdd...)

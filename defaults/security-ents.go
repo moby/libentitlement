@@ -43,11 +43,7 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	ociProfile.RemoveCaps(capsToRemove...)
 
 	syscallsToBlock := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality,
-		// SysSetuid,
-		// SysSetgid,
-		// SysPrctl,
-		SysMadvise,
+		SysPtrace, SysArchPrctl, SysPersonality, SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
@@ -91,10 +87,7 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 
 	syscallsToBlock := []types.Syscall{
 		SysPtrace,
-		// SysArchPrctl,
-		SysPersonality, // TODO: Block NO_RANDOMIZE, COMPAT_LAYOUT args etc..
-		// SysSetuid, SysSetgid,
-		// SysPrctl,
+		SysPersonality,
 		SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
