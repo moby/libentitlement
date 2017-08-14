@@ -116,7 +116,7 @@ func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	capsToRemove := []types.Capability{CapNetAdmin}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []types.Capability{CapNetRaw, CapNetBindService}
+	capsToAdd := []types.Capability{CapNetBroadcast, CapNetRaw, CapNetBindService}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsWithArgsToBlock := map[types.Syscall][]specs.LinuxSeccompArg{
