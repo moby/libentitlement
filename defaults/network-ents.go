@@ -36,9 +36,9 @@ var (
  * - No caps: CAP_NET_ADMIN, CAP_NET_BIND_SERVICE, CAP_NET_RAW, CAP_NET_BROADCAST
  * - Blocked syscalls:
  *     socket, socketpair, setsockopt, getsockopt, getsockname, getpeername, bind, listen, accept,
- *     accept4, connect, shutdown,recvfrom, recvmsg, sendto, sendmsg, sendmmsg, sethostname,
+ *     accept4, connect, shutdown,recvfrom, recvmsg, recvmmsg, sendto, sendmsg, sendmmsg, sethostname,
  *     setdomainname, socket for non AF_LOCAL/AF_UNIX domain
- * - Add network namespace
+ * - Enable network namespacing
  */
 func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
@@ -85,6 +85,7 @@ func networkNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 /* Implements "network.user" entitlement
  * - No caps: CAP_NET_ADMIN, CAP_NET_RAW, CAP_NET_BIND_SERVICE
  * - Authorized caps: CAP_NET_BROADCAST
+ * - Enable network namespacing
  */
 func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, NetworkUserEntFullID)
@@ -104,8 +105,7 @@ func networkUserEntitlementEnforce(profile secprofile.Profile) (secprofile.Profi
 /* Implements "network.proxy" entitlement
  * - No caps: CAP_NET_ADMIN
  * - Authorized caps: CAP_NET_BROADCAST, CAP_NET_RAW, CAP_NET_BIND_SERVICE
- * - Blocked syscalls:
- * 	setsockopt(SO_DEBUG)
+ * - Blocked syscalls: setsockopt for SO_DEBUG
  */
 func networkProxyEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, NetworkProxyEntFullID)
