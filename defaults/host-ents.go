@@ -39,7 +39,7 @@ var (
 )
 
 var (
-	allowedMounts = []specs.Mount{
+	defaultMobyAllowedMounts = []specs.Mount{
 		{
 			Destination: "/proc",
 			Type:        "proc",
@@ -80,7 +80,7 @@ var (
 )
 
 func isAllowedMount(mount specs.Mount) bool {
-	for _, allowedMount := range allowedMounts {
+	for _, allowedMount := range defaultMobyAllowedMounts {
 		if reflect.DeepEqual(mount, allowedMount) {
 			return true
 		}
@@ -112,7 +112,7 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, "/sys")
 	ociProfile.OCI.Linux.MaskedPaths = append(ociProfile.OCI.Linux.MaskedPaths, "/proc/kcore")
 
-	ociProfile.OCI.Mounts = allowedMounts
+	ociProfile.OCI.Mounts = defaultMobyAllowedMounts
 
 	return ociProfile, nil
 }
@@ -173,7 +173,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	}
 
 	// FIXME: just remove read-only flags for default mounts and leave additional mounts as is
-	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(allowedMounts)
+	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(defaultMobyAllowedMounts)
 
 	ociProfile.OCI.Linux.MaskedPaths = []string{}
 
