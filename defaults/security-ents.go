@@ -77,7 +77,7 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 /* Implements "security.view" entitlement:
  * - Blocked caps: CAP_SYS_ADMIN, CAP_SYS_PTRACE, CAP_SETUID, CAP_SETGID, CAP_SETPCAP, CAP_SETFCAP, CAP_MAC_ADMIN,
  *					CAP_MAC_OVERRIDE, CAP_DAC_OVERRIDE, CAP_FSETID, CAP_SYS_MODULE, CAP_SYSLOG, CAP_SYS_RAWIO,
- *					CAP_LINUX_IMMUTABLE
+ *					CAP_LINUX_IMMUTABLE, CAP_AUDIT_READ
  * - Authorized caps: CAP_DAC_READ_SEARCH
  * - Blocked Syscalls: ptrace, personality, madvise, prctl with PR_CAPBSET_DROP
  */
@@ -90,7 +90,7 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	capsToRemove := []types.Capability{
 		CapSysAdmin, CapSysPtrace,
 		CapSetuid, CapSetgid, CapSetpcap, CapSetfcap,
-		CapMacAdmin, CapMacOverride,
+		CapMacAdmin, CapMacOverride, CapAuditRead,
 		CapDacOverride, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
@@ -125,7 +125,8 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
  * - Authorized caps: CAP_MAC_ADMIN, CAP_MAC_OVERRIDE, CAP_DAC_OVERRIDE, CAP_DAC_READ_SEARCH, CAP_SETPCAP, CAP_SETFCAP,
  * 						CAP_SETUID, CAP_SETGID, CAP_SYS_PTRACE, CAP_FSETID, CAP_SYS_MODULE, CAP_SYSLOG, CAP_SYS_RAWIO,
  *						CAP_SYS_ADMIN, CAP_LINUX_IMMUTABLE, CAP_SYS_BOOT, CAP_SYS_NICE, CAP_SYS_PACCT,
- *						CAP_SYS_TTY_CONFIG, CAP_SYS_TIME, CAP_WAKE_ALARM
+ *						CAP_SYS_TTY_CONFIG, CAP_SYS_TIME, CAP_WAKE_ALARM, CAP_AUDIT_READ, CAP_AUDIT_WRITE,
+ *						CAP_AUDIT_CONTROL
  * - Allowed syscalls: ptrace, arch_prctl, personality, setuid, setgid, prctl, madvise, mount, init_module,
  *						finit_module, setns, clone, unshare
  * - No read-only paths
@@ -139,7 +140,7 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 	capsToAdd := []types.Capability{
 		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
 		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable, CapSysBoot,
-		CapSysNice, CapSysPacct, CapSysTtyConfig, CapSysTime, CapWakeAlarm,
+		CapSysNice, CapSysPacct, CapSysTtyConfig, CapSysTime, CapWakeAlarm, CapAuditRead, CapAuditWrite, CapAuditControl,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 

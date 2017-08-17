@@ -186,7 +186,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 }
 
 /* Implements "host.processes.none" entitlement
- * - Activates User Namespace
+ * - Activates PID Namespace
  */
 func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostProcessesNoneEntFullID)
@@ -195,7 +195,7 @@ func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile
 	}
 
 	nsToAdd := []specs.LinuxNamespaceType{
-		specs.UserNamespace,
+		specs.PIDNamespace,
 	}
 	ociProfile.AddNamespaces(nsToAdd...)
 
@@ -203,7 +203,7 @@ func hostProcessesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile
 }
 
 /* Implements "host.processes.admin" entitlement
- * - Deactivates User Namespace
+ * - Deactivates PID Namespace
  */
 func hostProcessesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostProcessesAdminEntFullID)
@@ -212,7 +212,7 @@ func hostProcessesAdminEntitlementEnforce(profile secprofile.Profile) (secprofil
 	}
 
 	nsToRemove := []specs.LinuxNamespaceType{
-		specs.UserNamespace,
+		specs.PIDNamespace,
 	}
 	ociProfile.RemoveNamespaces(nsToRemove...)
 
