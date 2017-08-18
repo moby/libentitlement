@@ -1,6 +1,8 @@
 package secprofile
 
 import (
+	"github.com/Sirupsen/logrus"
+	"github.com/docker/libentitlement/apparmor"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
@@ -9,24 +11,23 @@ import (
 // OCIProfileType is an identifier for an OCI profile
 var OCIProfileType = ProfileType("oci-profile")
 
-// AppArmorProfile is a set of AppArmor rules
-type AppArmorProfile struct {
-	Rules []string
-}
-
 // OCIProfile maintains some OCI spec settings but should also contain a complete security
 // context.
 // OCIProfile should be maintained for both Linux and Windows at any given time.
 // FIXME: Add error handling here if profile or subfields are not allocated */
 // Fixme add api access settings for Engine / Swarm / K8s?
 type OCIProfile struct {
-	OCI      *specs.Spec
-	AppArmor *AppArmorProfile
+	OCI           *specs.Spec
+	AppArmorSetup *apparmor.ProfileData
 }
 
 // NewOCIProfile instantiates an OCIProfile object with an OCI specification structure
-func NewOCIProfile(ociSpec *specs.Spec) *OCIProfile {
-	return &OCIProfile{OCI: ociSpec}
+func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile {
+	if apparmorProfileName == "" || apparmorProfileName == "unconfined" {
+		return &OCIProfile{OCI: ociSpec, AppArmorSetup: nil}
+	}
+
+	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewEmptyProfileData(apparmorProfileName)}
 }
 
 // GetType returns the OCI profile type identifier
@@ -44,8 +45,6 @@ func (p *OCIProfile) AddCaps(capsToAdd ...types.Capability) {
 		p.OCI.Process.Capabilities.Inheritable = addCapToList(p.OCI.Process.Capabilities.Inheritable, capStr)
 		p.OCI.Process.Capabilities.Permitted = addCapToList(p.OCI.Process.Capabilities.Permitted, capStr)
 
-		// Should be updated automatically if the previous masks are set
-		p.OCI.Process.Capabilities.Ambient = addCapToList(p.OCI.Process.Capabilities.Ambient, capStr)
 	}
 }
 
@@ -58,9 +57,6 @@ func (p *OCIProfile) RemoveCaps(capsToRemove ...types.Capability) {
 		p.OCI.Process.Capabilities.Effective = removeCapFromList(p.OCI.Process.Capabilities.Effective, capStr)
 		p.OCI.Process.Capabilities.Inheritable = removeCapFromList(p.OCI.Process.Capabilities.Inheritable, capStr)
 		p.OCI.Process.Capabilities.Permitted = removeCapFromList(p.OCI.Process.Capabilities.Permitted, capStr)
-
-		// Should be updated automatically if the previous masks are set
-		p.OCI.Process.Capabilities.Ambient = removeCapFromList(p.OCI.Process.Capabilities.Ambient, capStr)
 	}
 }
 
@@ -99,34 +95,56 @@ func (p *OCIProfile) AddNamespaces(nsTypes ...specs.LinuxNamespaceType) {
 	}
 }
 
-// AllowSyscallsWithArgs adds seccomp rules to allow syscalls with the given arguments if necessary
-func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[types.Syscall][]specs.LinuxSeccompArg) {
-	defaultActError := p.OCI.Linux.Seccomp.DefaultAction == specs.ActErrno
+// RemoveNamespaces disables a list of namespaces
+func (p *OCIProfile) RemoveNamespaces(nsTypes ...specs.LinuxNamespaceType) {
+	for _, ns := range nsTypes {
+		for index, namespace := range p.OCI.Linux.Namespaces {
+			if namespace.Type == ns {
+				p.OCI.Linux.Namespaces = append(p.OCI.Linux.Namespaces[:index], p.OCI.Linux.Namespaces[index+1:]...)
+			}
+		}
+	}
+}
 
-	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
-		syscallNameToAllowStr := string(syscallNameToAllow)
+func allowSyscallWithArgs(seccompProfile *specs.LinuxSeccomp, syscallName types.Syscall, syscallArgs []specs.LinuxSeccompArg) *specs.LinuxSeccomp {
+	defaultActError := seccompProfile.DefaultAction == specs.ActErrno
 
-		for _, syscallRule := range p.OCI.Linux.Seccomp.Syscalls {
+	syscallNameToAllowStr := string(syscallName)
 
-			if syscallRule.Action == specs.ActAllow {
-				for _, syscallName := range syscallRule.Names {
-					if syscallName == syscallNameToAllowStr &&
-						((len(syscallArgsToAllow) == 0 && len(syscallRule.Args) == 0) ||
-							reflect.DeepEqual(syscallRule.Args, syscallArgsToAllow)) {
-						return
-					}
+	logrus.Errorf("Allowing syscall: %s", syscallNameToAllowStr)
+
+	for _, syscallRule := range seccompProfile.Syscalls {
+
+		if syscallRule.Action == specs.ActAllow {
+			for _, syscallName := range syscallRule.Names {
+				if syscallName == syscallNameToAllowStr &&
+					((len(syscallArgs) == 0 && len(syscallRule.Args) == 0) ||
+						reflect.DeepEqual(syscallRule.Args, syscallArgs)) {
+					logrus.Errorf("Syscall already added: %s", syscallNameToAllowStr)
+					return seccompProfile
 				}
 			}
 		}
+	}
 
-		if defaultActError {
-			newRule := specs.LinuxSyscall{
-				Names:  []string{syscallNameToAllowStr},
-				Action: specs.ActAllow,
-				Args:   syscallArgsToAllow,
-			}
-			p.OCI.Linux.Seccomp.Syscalls = append(p.OCI.Linux.Seccomp.Syscalls, newRule)
+	if defaultActError {
+		newRule := specs.LinuxSyscall{
+			Names:  []string{syscallNameToAllowStr},
+			Action: specs.ActAllow,
+			Args:   syscallArgs,
 		}
+		seccompProfile.Syscalls = append(seccompProfile.Syscalls, newRule)
+
+		logrus.Errorf("Adding allow rule for syscall: %s", syscallNameToAllowStr)
+	}
+
+	return seccompProfile
+}
+
+// AllowSyscallsWithArgs adds seccomp rules to allow syscalls with the given arguments if necessary
+func (p *OCIProfile) AllowSyscallsWithArgs(syscallsWithArgsToAllow map[types.Syscall][]specs.LinuxSeccompArg) {
+	for syscallNameToAllow, syscallArgsToAllow := range syscallsWithArgsToAllow {
+		p.OCI.Linux.Seccomp = allowSyscallWithArgs(p.OCI.Linux.Seccomp, syscallNameToAllow, syscallArgsToAllow)
 	}
 }
 
