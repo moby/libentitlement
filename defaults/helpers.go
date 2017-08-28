@@ -9,6 +9,18 @@ import (
 	"reflect"
 )
 
+func capListContains(capList []string, capability types.Capability) bool {
+	capStr := string(capability)
+
+	for _, capElt := range capList {
+		if capElt == capStr {
+			return true
+		}
+	}
+
+	return false
+}
+
 func ociProfileConversionCheck(profile secprofile.Profile, entitlementID string) (*secprofile.OCIProfile, error) {
 	if profile.GetType() != secprofile.OCIProfileType {
 		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", entitlementID)
@@ -94,7 +106,7 @@ func seccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallNam
 	blocked := seccompProfile.DefaultAction == specs.ActErrno
 
 	if blocked {
-		// For each rule in the seccomp profile, make sure that whitelisting rules don't contain this syscall
+		// For each rule in the seccomp profile, make sure that no whitelisting rule contains this syscall
 		for _, seccompRule := range seccompProfile.Syscalls {
 			if seccompRule.Action == specs.ActAllow {
 				// If we match a whitelisting rule containing this syscall and those arguments, syscall is not blocked
@@ -131,6 +143,66 @@ func seccompSyscallsWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallsW
 func seccompSyscallsBlocked(seccompProfile specs.LinuxSeccomp, syscallNames []types.Syscall) bool {
 	for _, syscallName := range syscallNames {
 		if !seccompSyscallWithArgsBlocked(seccompProfile, syscallName, []specs.LinuxSeccompArg{}) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func capBlocked(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
+	return !(capListContains(linuxCaps.Bounding, capability) || capListContains(linuxCaps.Permitted, capability) ||
+		capListContains(linuxCaps.Inheritable, capability) || capListContains(linuxCaps.Effective, capability))
+}
+
+func capsBlocked(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
+	for _, capability := range capabilities {
+		if !capBlocked(linuxCaps, capability) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func capAllowed(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
+	return capListContains(linuxCaps.Bounding, capability) && capListContains(linuxCaps.Permitted, capability) &&
+		capListContains(linuxCaps.Inheritable, capability) && capListContains(linuxCaps.Effective, capability)
+}
+
+func capsAllowed(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
+	for _, capability := range capabilities {
+		if !capAllowed(linuxCaps, capability) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func namespaceActivated(nsList []specs.LinuxNamespace, namespace specs.LinuxNamespaceType) bool {
+	for _, ns := range nsList {
+		if ns.Type == namespace {
+			return true
+		}
+	}
+
+	return false
+}
+
+func namespacesActivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
+	for _, namespace := range namespaces {
+		if !namespaceActivated(nsList, namespace) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func namespacesDeactivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
+	for _, namespace := range namespaces {
+		if namespaceActivated(nsList, namespace) {
 			return false
 		}
 	}
