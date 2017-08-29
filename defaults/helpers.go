@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/docker/libentitlement/secprofile"
-	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/docker/libentitlement/types"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
 )
 
@@ -61,12 +61,21 @@ func testSpec() *specs.Spec {
 		},
 	}
 
+	seccomp, err := setDefaultSeccompProfile()
+	if err != nil {
+		// In case we get an error before seccomp struct is fully updated from decoded json, we empty it manually.
+		s.Linux.Seccomp = &specs.LinuxSeccomp{}
+	}
+
+	s.Linux.Seccomp = seccomp
+
 	return s
 }
 
 // We can't create a map to check set inclusion with specs.LinuxSeccompArg as key type in Golang so no O(n)
 func seccompArgsContains(syscallArgsSet, syscallArgsSubset []specs.LinuxSeccompArg) bool {
-	if len(syscallArgsSet) < len(syscallArgsSubset) {
+	if len(syscallArgsSet) < len(syscallArgsSubset) ||
+		(len(syscallArgsSubset) == 0 && len(syscallArgsSet) != 0) {
 		return false
 	}
 
@@ -92,12 +101,12 @@ func matchSeccompRule(seccompRule specs.LinuxSyscall, syscallName string, syscal
 	for _, name := range seccompRule.Names {
 		if name == syscallName {
 			if seccompArgsContains(seccompRule.Args, syscallArgs) {
-				return false
+				return true
 			}
 		}
 	}
 
-	return true
+	return false
 }
 
 func seccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallName types.Syscall, syscallArgs []specs.LinuxSeccompArg) bool {

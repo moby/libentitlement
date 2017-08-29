@@ -1,12 +1,13 @@
 package defaults
 
 import (
-	"testing"
-	"github.com/opencontainers/runtime-spec/specs-go"
-	"github.com/docker/libentitlement/secprofile"
-	"github.com/stretchr/testify/require"
-	"github.com/docker/libentitlement/types"
 	"syscall"
+	"testing"
+
+	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/types"
+	"github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNetworkNoneEntitlementEnforce(t *testing.T) {
@@ -42,8 +43,8 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 	require.NotNil(t, newOCIProfile.OCI.Linux.Seccomp)
 
 	syscallsToBlock := []types.Syscall{SysSocket, SysSocketpair, SysSetsockopt, SysGetsockopt, SysGetsockname, SysGetpeername,
-									   SysBind, SysListen, SysAccept, SysAccept4, SysConnect, SysShutdown, SysRecvfrom, SysRecvmsg, SysRecvmmsg, SysSendto,
-									   SysSendmsg, SysSendmmsg, SysSethostname, SysSetdomainname,
+		SysBind, SysListen, SysAccept, SysAccept4, SysConnect, SysShutdown, SysRecvfrom, SysRecvmsg, SysRecvmmsg, SysSendto,
+		SysSendmsg, SysSendmmsg, SysSethostname, SysSetdomainname,
 	}
 	require.True(t, seccompSyscallsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsToBlock))
 
@@ -61,7 +62,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 			},
 		},
 	}
-	require.True(t, seccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
+	require.False(t, seccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
 }
 
 func TestNetworkUserEntitlementEnforce(t *testing.T) {

@@ -18,4 +18,4 @@ lint:
 
 
 test: lint
-	go test .
+	@go test $(shell go list ./... | grep -v /vendor/)
