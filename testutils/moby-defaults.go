@@ -36,7 +36,7 @@ var (
 	}
 )
 
-func setDefaultSeccompProfile() (*specs.LinuxSeccomp, error) {
+func getDefaultSeccompProfile() (*specs.LinuxSeccomp, error) {
 	var profile specs.LinuxSeccomp
 
 	_, currentPath, _, _ := runtime.Caller(0)
@@ -54,4 +54,24 @@ func setDefaultSeccompProfile() (*specs.LinuxSeccomp, error) {
 	}
 
 	return &profile, nil
+}
+
+func getDefaultCapList() []string {
+	capList := []string{}
+
+	for capName := range mobyDefaultCaps {
+		capList = append(capList, string(capName))
+	}
+
+	return capList
+}
+
+func getDefaultCapSet() map[types.Capability]bool {
+	capSet := make(map[types.Capability]bool)
+
+	for cap, val := range mobyDefaultCaps {
+		capSet[cap] = val
+	}
+
+	return capSet
 }

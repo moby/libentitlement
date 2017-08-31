@@ -32,7 +32,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
 	capsToRemove := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetBindService, osdefs.CapNetRaw, osdefs.CapNetBroadcast}
-	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
+	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, nil, capsToRemove))
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
 	for _, pathToMask := range pathsToMask {
@@ -87,7 +87,7 @@ func TestNetworkUserEntitlementEnforce(t *testing.T) {
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
 	capsToRemove := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetBindService, osdefs.CapNetRaw}
-	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
+	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, nil, capsToRemove))
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
 	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
@@ -113,10 +113,8 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
 	capsToRemove := []types.Capability{osdefs.CapNetAdmin}
-	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
-
 	capsToAdd := []types.Capability{osdefs.CapNetBroadcast, osdefs.CapNetRaw, osdefs.CapNetBindService}
-	require.True(t, testutils.CapsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
+	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, capsToAdd, capsToRemove))
 
 	require.NotNil(t, newOCIProfile.OCI.Linux.Seccomp)
 
@@ -155,5 +153,5 @@ func TestNetworkAdminEntitlementEnforce(t *testing.T) {
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
 	capsToAdd := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetRaw, osdefs.CapNetBindService, osdefs.CapNetBroadcast}
-	require.True(t, testutils.CapsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
+	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, capsToAdd, nil))
 }

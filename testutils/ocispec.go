@@ -6,10 +6,6 @@ import (
 	"reflect"
 )
 
-var (
-	testCapslist = mobyDefaultCaps
-)
-
 func capListContains(capList []string, capability types.Capability) bool {
 	capStr := string(capability)
 
@@ -49,13 +45,18 @@ func TestSpec() *specs.Spec {
 		},
 	}
 
-	seccomp, err := setDefaultSeccompProfile()
+	seccomp, err := getDefaultSeccompProfile()
 	if err != nil {
 		// In case we get an error before seccomp struct is fully updated from decoded json, we empty it manually.
 		s.Linux.Seccomp = &specs.LinuxSeccomp{DefaultAction: specs.ActErrno}
+	} else {
+		s.Linux.Seccomp = seccomp
 	}
 
-	s.Linux.Seccomp = seccomp
+	s.Process.Capabilities.Bounding = getDefaultCapList()
+	s.Process.Capabilities.Effective = getDefaultCapList()
+	s.Process.Capabilities.Inheritable = getDefaultCapList()
+	s.Process.Capabilities.Permitted = getDefaultCapList()
 
 	return s
 }
@@ -183,6 +184,65 @@ func CapsAllowed(linuxCaps specs.LinuxCapabilities, capabilities []types.Capabil
 	}
 
 	return true
+}
+
+// capsListMatchRefSet checks that the cap list and the reference set contain the same capabilities
+func capsListMatchRefSet(refWithConstraints map[types.Capability]bool, capList []string) bool {
+	if len(refWithConstraints) != len(capList) {
+		return false
+	}
+
+	refWithConstraintsStr := make(map[string]bool)
+	for cap, val := range refWithConstraints {
+		refWithConstraintsStr[string(cap)] = val
+	}
+
+	for _, cap := range capList {
+		if _, ok := refWithConstraintsStr[cap]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// capsListMatchRefWithConstraints checks that a provided list of capabilities matches exactly the content of
+// the default capabilities plus a list of capabilities to add minus a list of capabilities to remove
+func capsListMatchRefWithConstraints(capList []string, capsToAdd, capsToRemove []types.Capability) bool {
+	refWithConstraints := getDefaultCapSet()
+
+	for _, capToAdd := range capsToAdd {
+		if _, ok := refWithConstraints[capToAdd]; !ok {
+			refWithConstraints[capToAdd] = true
+		}
+	}
+
+	for _, capToRemove := range capsToRemove {
+		if _, ok := refWithConstraints[capToRemove]; ok {
+			delete(refWithConstraints, capToRemove)
+		}
+	}
+
+	return capsListMatchRefSet(refWithConstraints, capList)
+}
+
+// OCICapsMatchRefWithConstraints checks that all OCI capability lists match exactly the ref cap list with
+// entitlement's constraints to apply.
+func OCICapsMatchRefWithConstraints(capabilities specs.LinuxCapabilities, capsToAdd, capsToRemove []types.Capability) bool {
+	capStrLists := [][]string{
+		capabilities.Permitted,
+		capabilities.Inheritable,
+		capabilities.Effective,
+		capabilities.Bounding,
+	}
+
+	match := true
+
+	for _, capStrList := range capStrLists {
+		match = match && capsListMatchRefWithConstraints(capStrList, capsToAdd, capsToRemove)
+	}
+
+	return match
 }
 
 // NamespaceActivated checks that the provided namespace is enabled

@@ -15,7 +15,8 @@ func addCapToList(capList []string, capToAdd string) []string {
 func removeCapFromList(capList []string, capToRemove string) []string {
 	for index, cap := range capList {
 		if cap == capToRemove {
-			return append(capList[:index], capList[index+1:]...)
+			capList = append(capList[:index], capList[index+1:]...)
+			break
 		}
 	}
 
