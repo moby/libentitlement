@@ -5,15 +5,17 @@ import (
 	"testing"
 
 	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile/osdefs"
+	"github.com/docker/libentitlement/testutils"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNetworkNoneEntitlementEnforce(t *testing.T) {
-	entitlementID := "network.none"
+	entitlementID := NetworkNoneEntFullID
 
-	ociProfile := secprofile.NewOCIProfile(testSpec(), "test-profile")
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
 	require.Contains(t, DefaultEntitlements, entitlementID)
 
 	ent := DefaultEntitlements[entitlementID]
@@ -29,8 +31,8 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
-	capsToRemove := []types.Capability{CapNetAdmin, CapNetBindService, CapNetRaw, CapNetBroadcast}
-	require.True(t, capsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
+	capsToRemove := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetBindService, osdefs.CapNetRaw, osdefs.CapNetBroadcast}
+	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
 
 	pathsToMask := []string{"/proc/pid/net", "/proc/sys/net", "/sys/class/net"}
 	for _, pathToMask := range pathsToMask {
@@ -38,18 +40,18 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 	}
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, namespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 
 	require.NotNil(t, newOCIProfile.OCI.Linux.Seccomp)
 
-	syscallsToBlock := []types.Syscall{SysSocket, SysSocketpair, SysSetsockopt, SysGetsockopt, SysGetsockname, SysGetpeername,
-		SysBind, SysListen, SysAccept, SysAccept4, SysConnect, SysShutdown, SysRecvfrom, SysRecvmsg, SysRecvmmsg, SysSendto,
-		SysSendmsg, SysSendmmsg, SysSethostname, SysSetdomainname,
+	syscallsToBlock := []types.Syscall{osdefs.SysSocket, osdefs.SysSocketpair, osdefs.SysSetsockopt, osdefs.SysGetsockopt, osdefs.SysGetsockname, osdefs.SysGetpeername,
+		osdefs.SysBind, osdefs.SysListen, osdefs.SysAccept, osdefs.SysAccept4, osdefs.SysConnect, osdefs.SysShutdown, osdefs.SysRecvfrom, osdefs.SysRecvmsg, osdefs.SysRecvmmsg, osdefs.SysSendto,
+		osdefs.SysSendmsg, osdefs.SysSendmmsg, osdefs.SysSethostname, osdefs.SysSetdomainname,
 	}
-	require.True(t, seccompSyscallsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsToBlock))
+	require.True(t, testutils.SeccompSyscallsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsToBlock))
 
 	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
-		SysSocket: {
+		osdefs.SysSocket: {
 			{
 				Index: 0,
 				Op:    specs.OpEqualTo,
@@ -62,13 +64,13 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 			},
 		},
 	}
-	require.False(t, seccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
+	require.False(t, testutils.SeccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
 }
 
 func TestNetworkUserEntitlementEnforce(t *testing.T) {
-	entitlementID := "network.user"
+	entitlementID := NetworkUserEntFullID
 
-	ociProfile := secprofile.NewOCIProfile(testSpec(), "test-profile")
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
 	require.Contains(t, DefaultEntitlements, entitlementID)
 
 	ent := DefaultEntitlements[entitlementID]
@@ -84,17 +86,17 @@ func TestNetworkUserEntitlementEnforce(t *testing.T) {
 
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
-	capsToRemove := []types.Capability{CapNetAdmin, CapNetBindService, CapNetRaw}
-	require.True(t, capsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
+	capsToRemove := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetBindService, osdefs.CapNetRaw}
+	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, namespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 }
 
 func TestNetworkProxyEntitlementEnforce(t *testing.T) {
-	entitlementID := "network.proxy"
+	entitlementID := NetworkProxyEntFullID
 
-	ociProfile := secprofile.NewOCIProfile(testSpec(), "test-profile")
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
 	require.Contains(t, DefaultEntitlements, entitlementID)
 
 	ent := DefaultEntitlements[entitlementID]
@@ -110,16 +112,16 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
-	capsToRemove := []types.Capability{CapNetAdmin}
-	require.True(t, capsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
+	capsToRemove := []types.Capability{osdefs.CapNetAdmin}
+	require.True(t, testutils.CapsBlocked(*newOCIProfile.OCI.Process.Capabilities, capsToRemove))
 
-	capsToAdd := []types.Capability{CapNetBroadcast, CapNetRaw, CapNetBindService}
-	require.True(t, capsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
+	capsToAdd := []types.Capability{osdefs.CapNetBroadcast, osdefs.CapNetRaw, osdefs.CapNetBindService}
+	require.True(t, testutils.CapsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
 
 	require.NotNil(t, newOCIProfile.OCI.Linux.Seccomp)
 
 	syscallsWithArgsToBlock := map[types.Syscall][]specs.LinuxSeccompArg{
-		SysSetsockopt: {
+		osdefs.SysSetsockopt: {
 			{
 				Index:    2,
 				Value:    syscall.SO_DEBUG,
@@ -128,16 +130,16 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 			},
 		},
 	}
-	require.True(t, seccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToBlock))
+	require.True(t, testutils.SeccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToBlock))
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, namespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 }
 
 func TestNetworkAdminEntitlementEnforce(t *testing.T) {
-	entitlementID := "network.admin"
+	entitlementID := NetworkAdminEntFullID
 
-	ociProfile := secprofile.NewOCIProfile(testSpec(), "test-profile")
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
 	require.Contains(t, DefaultEntitlements, entitlementID)
 
 	ent := DefaultEntitlements[entitlementID]
@@ -152,6 +154,6 @@ func TestNetworkAdminEntitlementEnforce(t *testing.T) {
 
 	require.NotNil(t, newOCIProfile.OCI.Process.Capabilities)
 
-	capsToAdd := []types.Capability{CapNetAdmin, CapNetRaw, CapNetBindService, CapNetBroadcast}
-	require.True(t, capsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
+	capsToAdd := []types.Capability{osdefs.CapNetAdmin, osdefs.CapNetRaw, osdefs.CapNetBindService, osdefs.CapNetBroadcast}
+	require.True(t, testutils.CapsAllowed(*newOCIProfile.OCI.Process.Capabilities, capsToAdd))
 }

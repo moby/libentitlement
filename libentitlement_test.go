@@ -7,11 +7,12 @@ import (
 	"github.com/docker/libentitlement/defaults"
 	"github.com/docker/libentitlement/entitlement"
 	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRegisterDummyEntitlement(t *testing.T) {
-	spec := testSpec()
+	spec := testutils.TestSpec()
 	profile := secprofile.NewOCIProfile(spec, "dummy-profile-default")
 
 	entMgr := NewEntitlementsManager(profile)

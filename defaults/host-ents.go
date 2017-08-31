@@ -3,6 +3,7 @@ package defaults
 import (
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile/osdefs"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"reflect"
@@ -102,7 +103,7 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	}
 
 	capsToRemove := []types.Capability{
-		CapSysAdmin,
+		osdefs.CapSysAdmin,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
@@ -178,7 +179,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	ociProfile.OCI.Linux.MaskedPaths = []string{}
 
 	capsToAdd := []types.Capability{
-		CapSysAdmin,
+		osdefs.CapSysAdmin,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
