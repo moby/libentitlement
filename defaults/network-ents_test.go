@@ -104,7 +104,7 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkUserEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkProxyEntFullID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)
@@ -145,7 +145,7 @@ func TestNetworkAdminEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkUserEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkAdminEntFullID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)
