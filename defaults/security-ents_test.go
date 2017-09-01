@@ -1,13 +1,14 @@
 package defaults
 
 import (
+	"testing"
+
 	"github.com/docker/libentitlement/secprofile"
 	"github.com/docker/libentitlement/secprofile/osdefs"
 	"github.com/docker/libentitlement/testutils"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestSecurityConfinedEntitlementEnforce(t *testing.T) {

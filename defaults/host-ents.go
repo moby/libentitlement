@@ -134,7 +134,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	}
 
 	// FIXME: just remove read-only flags for default mounts and leave additional mounts as is
-	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(osdefs.DefaultMobyAllowedMounts)
+	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(ociProfile.OCI.Mounts)
 
 	ociProfile.OCI.Linux.MaskedPaths = []string{}
 

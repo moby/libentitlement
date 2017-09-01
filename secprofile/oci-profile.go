@@ -1,11 +1,12 @@
 package secprofile
 
 import (
+	"reflect"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libentitlement/apparmor"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"reflect"
 )
 
 // OCIProfileType is an identifier for an OCI profile
@@ -118,7 +119,7 @@ func allowSyscallWithArgs(seccompProfile *specs.LinuxSeccomp, syscallName types.
 				if syscallName == syscallNameToAllowStr &&
 					((len(syscallArgs) == 0 && len(syscallRule.Args) == 0) ||
 						reflect.DeepEqual(syscallRule.Args, syscallArgs)) {
-					logrus.Errorf("Syscall already added: %s", syscallNameToAllowStr)
+					logrus.Debugf("Syscall already added to Seccomp profile: %s", syscallNameToAllowStr)
 					return seccompProfile
 				}
 			}
