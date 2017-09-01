@@ -41,3 +41,21 @@ func TestDevicesNoneEntitlementEnforce(t *testing.T) {
 
 	require.Equal(t, ociProfile.OCI.Mounts, osdefs.DefaultMobyAllowedMounts)
 }
+
+func TestDevicesViewEntitlementEnforce(t *testing.T) {
+	entitlementID := HostDevicesViewEntFullID
+
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
+	require.Contains(t, DefaultEntitlements, entitlementID)
+
+	ent := DefaultEntitlements[entitlementID]
+
+	newProfile, err := ent.Enforce(ociProfile)
+	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
+
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, entitlementID)
+	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
+
+	nonDefaultMounts := testutils.GetNonDefaultMounts(ociProfile.OCI.Mounts)
+	require.True(t, testutils.PathListMatchRefMount(newOCIProfile.OCI.Linux.ReadonlyPaths, nonDefaultMounts))
+}

@@ -79,7 +79,7 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 }
 
 /* Implements "host.devices.view" entitlement
- * - Sets all custom mounts to read-only
+ * - Sets all custom mount destinations to read-only
  */
 func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesViewEntFullID)
