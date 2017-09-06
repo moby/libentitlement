@@ -40,7 +40,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 	}
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.AreNamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 
 	require.NotNil(t, newOCIProfile.OCI.Linux.Seccomp)
 
@@ -48,7 +48,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 		osdefs.SysBind, osdefs.SysListen, osdefs.SysAccept, osdefs.SysAccept4, osdefs.SysConnect, osdefs.SysShutdown, osdefs.SysRecvfrom, osdefs.SysRecvmsg, osdefs.SysRecvmmsg, osdefs.SysSendto,
 		osdefs.SysSendmsg, osdefs.SysSendmmsg, osdefs.SysSethostname, osdefs.SysSetdomainname,
 	}
-	require.True(t, testutils.SeccompSyscallsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsToBlock))
+	require.True(t, testutils.AreSyscallsBlockedBySeccomp(*newOCIProfile.OCI.Linux.Seccomp, syscallsToBlock))
 
 	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
 		osdefs.SysSocket: {
@@ -64,7 +64,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 			},
 		},
 	}
-	require.False(t, testutils.SeccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
+	require.False(t, testutils.AreSyscallsWithArgsBlockedBySeccomp(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToAllow))
 }
 
 func TestNetworkUserEntitlementEnforce(t *testing.T) {
@@ -90,7 +90,7 @@ func TestNetworkUserEntitlementEnforce(t *testing.T) {
 	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, nil, capsToRemove))
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.AreNamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 }
 
 func TestNetworkProxyEntitlementEnforce(t *testing.T) {
@@ -128,10 +128,10 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 			},
 		},
 	}
-	require.True(t, testutils.SeccompSyscallsWithArgsBlocked(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToBlock))
+	require.True(t, testutils.AreSyscallsWithArgsBlockedBySeccomp(*newOCIProfile.OCI.Linux.Seccomp, syscallsWithArgsToBlock))
 
 	nsToAdd := []specs.LinuxNamespaceType{specs.NetworkNamespace}
-	require.True(t, testutils.NamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
+	require.True(t, testutils.AreNamespacesActivated(newOCIProfile.OCI.Linux.Namespaces, nsToAdd))
 }
 
 func TestNetworkAdminEntitlementEnforce(t *testing.T) {

@@ -61,18 +61,18 @@ func TestSpec() *specs.Spec {
 	return s
 }
 
-// SyscallArgsMatchSeccompRuleArgs checks that the seccomp rule's args match the provided syscall args
-func SyscallArgsMatchSeccompRuleArgs(syscallArgsRule, syscallArgsSyscall []specs.LinuxSeccompArg) bool {
-	if len(syscallArgsRule) < len(syscallArgsSyscall) ||
-		(len(syscallArgsSyscall) == 0 && len(syscallArgsRule) != 0) {
+// areSyscallArgsMatchedBySeccompRuleArgs checks that the seccomp rule's args match the provided syscall args
+func areSyscallArgsMatchedBySeccompRuleArgs(argsFromRule, argsFromSyscall []specs.LinuxSeccompArg) bool {
+	if len(argsFromRule) < len(argsFromSyscall) ||
+		(len(argsFromSyscall) == 0 && len(argsFromRule) != 0) {
 		return false
 	}
 
-	for _, syscallArgFromSyscall := range syscallArgsSyscall {
+	for _, argFromSyscall := range argsFromSyscall {
 		found := false
 
-		for _, syscallArgsFromRule := range syscallArgsRule {
-			if reflect.DeepEqual(syscallArgFromSyscall, syscallArgsFromRule) {
+		for _, argFromRule := range argsFromRule {
+			if reflect.DeepEqual(argFromSyscall, argFromRule) {
 				found = true
 				break
 			}
@@ -86,11 +86,11 @@ func SyscallArgsMatchSeccompRuleArgs(syscallArgsRule, syscallArgsSyscall []specs
 	return true
 }
 
-// MatchSeccompRule checks that the seccomp rule matches the provided syscall and args
-func MatchSeccompRule(seccompRule specs.LinuxSyscall, syscallName string, syscallArgs []specs.LinuxSeccompArg) bool {
+// syscallWithArgsMatchSeccompRule checks that the seccomp rule matches the provided syscall and args
+func isSyscallWithArgsMatchedBySeccompRule(seccompRule specs.LinuxSyscall, syscallName string, syscallArgs []specs.LinuxSeccompArg) bool {
 	for _, name := range seccompRule.Names {
 		if name == syscallName {
-			if SyscallArgsMatchSeccompRuleArgs(seccompRule.Args, syscallArgs) {
+			if areSyscallArgsMatchedBySeccompRuleArgs(seccompRule.Args, syscallArgs) {
 				return true
 			}
 		}
@@ -99,8 +99,8 @@ func MatchSeccompRule(seccompRule specs.LinuxSyscall, syscallName string, syscal
 	return false
 }
 
-// SeccompSyscallWithArgsBlocked checks that the provided syscall and args are blocked by the seccomp profile
-func SeccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallName types.Syscall, syscallArgs []specs.LinuxSeccompArg) bool {
+// isSyscallWithArgsBlockedBySeccomp checks that the provided syscall and args are blocked by the seccomp profile
+func isSyscallWithArgsBlockedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallName types.Syscall, syscallArgs []specs.LinuxSeccompArg) bool {
 	syscallNameStr := string(syscallName)
 
 	blocked := seccompProfile.DefaultAction == specs.ActErrno
@@ -110,7 +110,7 @@ func SeccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallNam
 		for _, seccompRule := range seccompProfile.Syscalls {
 			if seccompRule.Action == specs.ActAllow {
 				// If we match a whitelisting rule containing this syscall and those arguments, syscall is not blocked
-				if MatchSeccompRule(seccompRule, syscallNameStr, syscallArgs) {
+				if isSyscallWithArgsMatchedBySeccompRule(seccompRule, syscallNameStr, syscallArgs) {
 					return false
 				}
 			}
@@ -120,7 +120,7 @@ func SeccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallNam
 		for _, seccompRule := range seccompProfile.Syscalls {
 			if seccompRule.Action == specs.ActErrno {
 				// If we match a blacklisting rule containing this syscall and those arguments, syscall is blocked
-				if MatchSeccompRule(seccompRule, syscallNameStr, syscallArgs) {
+				if isSyscallWithArgsMatchedBySeccompRule(seccompRule, syscallNameStr, syscallArgs) {
 					return true
 				}
 			}
@@ -130,10 +130,10 @@ func SeccompSyscallWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallNam
 	return blocked
 }
 
-// SeccompSyscallsWithArgsBlocked checks that the provided list of syscalls and args are blocked by the seccomp profile
-func SeccompSyscallsWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallsWithArgs map[types.Syscall][]specs.LinuxSeccompArg) bool {
+// AreSyscallsWithArgsBlockedBySeccomp checks that the provided list of syscalls and args are blocked by the seccomp profile
+func AreSyscallsWithArgsBlockedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallsWithArgs map[types.Syscall][]specs.LinuxSeccompArg) bool {
 	for syscallName, syscallArgs := range syscallsWithArgs {
-		if !SeccompSyscallWithArgsBlocked(seccompProfile, syscallName, syscallArgs) {
+		if !isSyscallWithArgsBlockedBySeccomp(seccompProfile, syscallName, syscallArgs) {
 			return false
 		}
 	}
@@ -141,10 +141,10 @@ func SeccompSyscallsWithArgsBlocked(seccompProfile specs.LinuxSeccomp, syscallsW
 	return true
 }
 
-// SeccompSyscallsBlocked checks that the provided syscalls are blocked by the seccomp profile
-func SeccompSyscallsBlocked(seccompProfile specs.LinuxSeccomp, syscallNames []types.Syscall) bool {
+// AreSyscallsBlockedBySeccomp checks that the provided syscalls are blocked by the seccomp profile
+func AreSyscallsBlockedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallNames []types.Syscall) bool {
 	for _, syscallName := range syscallNames {
-		if !SeccompSyscallWithArgsBlocked(seccompProfile, syscallName, []specs.LinuxSeccompArg{}) {
+		if !isSyscallWithArgsBlockedBySeccomp(seccompProfile, syscallName, []specs.LinuxSeccompArg{}) {
 			return false
 		}
 	}
@@ -152,16 +152,16 @@ func SeccompSyscallsBlocked(seccompProfile specs.LinuxSeccomp, syscallNames []ty
 	return true
 }
 
-// CapBlocked checks that the provided capability is not allowed
-func CapBlocked(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
+// isCapBlocked checks that the provided capability is not allowed
+func isCapBlocked(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
 	return !(capListContains(linuxCaps.Bounding, capability) || capListContains(linuxCaps.Permitted, capability) ||
 		capListContains(linuxCaps.Inheritable, capability) || capListContains(linuxCaps.Effective, capability))
 }
 
-// CapsBlocked checks that capabilities in the provided cap list are not allowed
-func CapsBlocked(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
+// AreCapsBlocked checks that capabilities in the provided cap list are not allowed
+func AreCapsBlocked(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
 	for _, capability := range capabilities {
-		if !CapBlocked(linuxCaps, capability) {
+		if !isCapBlocked(linuxCaps, capability) {
 			return false
 		}
 	}
@@ -169,16 +169,16 @@ func CapsBlocked(linuxCaps specs.LinuxCapabilities, capabilities []types.Capabil
 	return true
 }
 
-// CapAllowed checks that the provided capability is allowed
-func CapAllowed(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
+// isCapAllowed checks that the provided capability is allowed
+func isCapAllowed(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
 	return capListContains(linuxCaps.Bounding, capability) && capListContains(linuxCaps.Permitted, capability) &&
 		capListContains(linuxCaps.Inheritable, capability) && capListContains(linuxCaps.Effective, capability)
 }
 
-// CapsAllowed checks that capabilities in the provided cap list are allowed
-func CapsAllowed(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
+// AreCapsAllowed checks that capabilities in the provided cap list are allowed
+func AreCapsAllowed(linuxCaps specs.LinuxCapabilities, capabilities []types.Capability) bool {
 	for _, capability := range capabilities {
-		if !CapAllowed(linuxCaps, capability) {
+		if !isCapAllowed(linuxCaps, capability) {
 			return false
 		}
 	}
@@ -245,8 +245,8 @@ func OCICapsMatchRefWithConstraints(capabilities specs.LinuxCapabilities, capsTo
 	return match
 }
 
-// NamespaceActivated checks that the provided namespace is enabled
-func NamespaceActivated(nsList []specs.LinuxNamespace, namespace specs.LinuxNamespaceType) bool {
+// isNamespaceActived checks that the provided namespace is enabled
+func isNamespaceActived(nsList []specs.LinuxNamespace, namespace specs.LinuxNamespaceType) bool {
 	for _, ns := range nsList {
 		if ns.Type == namespace {
 			return true
@@ -256,10 +256,10 @@ func NamespaceActivated(nsList []specs.LinuxNamespace, namespace specs.LinuxName
 	return false
 }
 
-// NamespacesActivated checks that the namespaces in the provided ns list are enabled
-func NamespacesActivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
+// AreNamespacesActivated checks that the namespaces in the provided ns list are enabled
+func AreNamespacesActivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
 	for _, namespace := range namespaces {
-		if !NamespaceActivated(nsList, namespace) {
+		if !isNamespaceActived(nsList, namespace) {
 			return false
 		}
 	}
@@ -267,10 +267,10 @@ func NamespacesActivated(nsList []specs.LinuxNamespace, namespaces []specs.Linux
 	return true
 }
 
-// NamespacesDeactivated checks that the namespaces in the provided ns list are disabled
-func NamespacesDeactivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
+// AreNamespacesDeactivated checks that the namespaces in the provided ns list are disabled
+func AreNamespacesDeactivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
 	for _, namespace := range namespaces {
-		if NamespaceActivated(nsList, namespace) {
+		if isNamespaceActived(nsList, namespace) {
 			return false
 		}
 	}
