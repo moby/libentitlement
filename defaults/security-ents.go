@@ -1,9 +1,9 @@
 package defaults
 
 import (
-	"github.com/docker/libentitlement/defaults/osdefs"
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile/osdefs"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
@@ -43,18 +43,18 @@ func securityConfinedEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	}
 
 	capsToRemove := []types.Capability{
-		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
-		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable,
+		osdefs.CapMacAdmin, osdefs.CapMacOverride, osdefs.CapDacOverride, osdefs.CapDacReadSearch, osdefs.CapSetpcap, osdefs.CapSetfcap, osdefs.CapSetuid, osdefs.CapSetgid,
+		osdefs.CapSysPtrace, osdefs.CapFsetid, osdefs.CapSysModule, osdefs.CapSyslog, osdefs.CapSysRawio, osdefs.CapSysAdmin, osdefs.CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
 	syscallsToBlock := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality, SysMadvise,
+		osdefs.SysPtrace, osdefs.SysArchPrctl, osdefs.SysPersonality, osdefs.SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
-		SysPrctl: {
+		osdefs.SysPrctl: {
 			{
 				Index: 0,
 				Value: osdefs.PrCapbsetDrop,
@@ -88,25 +88,25 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 	}
 
 	capsToRemove := []types.Capability{
-		CapSysAdmin, CapSysPtrace,
-		CapSetuid, CapSetgid, CapSetpcap, CapSetfcap,
-		CapMacAdmin, CapMacOverride, CapAuditRead,
-		CapDacOverride, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapLinuxImmutable,
+		osdefs.CapSysAdmin, osdefs.CapSysPtrace,
+		osdefs.CapSetuid, osdefs.CapSetgid, osdefs.CapSetpcap, osdefs.CapSetfcap,
+		osdefs.CapMacAdmin, osdefs.CapMacOverride, osdefs.CapAuditRead,
+		osdefs.CapDacOverride, osdefs.CapFsetid, osdefs.CapSysModule, osdefs.CapSyslog, osdefs.CapSysRawio, osdefs.CapLinuxImmutable,
 	}
 	ociProfile.RemoveCaps(capsToRemove...)
 
-	capsToAdd := []types.Capability{CapDacReadSearch}
+	capsToAdd := []types.Capability{osdefs.CapDacReadSearch}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToBlock := []types.Syscall{
-		SysPtrace,
-		SysPersonality,
-		SysMadvise,
+		osdefs.SysPtrace,
+		osdefs.SysPersonality,
+		osdefs.SysMadvise,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 
 	syscallsWithArgsToAllow := map[types.Syscall][]specs.LinuxSeccompArg{
-		SysPrctl: {
+		osdefs.SysPrctl: {
 			{
 				Index: 0,
 				Value: osdefs.PrCapbsetDrop,
@@ -138,15 +138,15 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 	}
 
 	capsToAdd := []types.Capability{
-		CapMacAdmin, CapMacOverride, CapDacOverride, CapDacReadSearch, CapSetpcap, CapSetfcap, CapSetuid, CapSetgid,
-		CapSysPtrace, CapFsetid, CapSysModule, CapSyslog, CapSysRawio, CapSysAdmin, CapLinuxImmutable, CapSysBoot,
-		CapSysNice, CapSysPacct, CapSysTtyConfig, CapSysTime, CapWakeAlarm, CapAuditRead, CapAuditWrite, CapAuditControl,
+		osdefs.CapMacAdmin, osdefs.CapMacOverride, osdefs.CapDacOverride, osdefs.CapDacReadSearch, osdefs.CapSetpcap, osdefs.CapSetfcap, osdefs.CapSetuid, osdefs.CapSetgid,
+		osdefs.CapSysPtrace, osdefs.CapFsetid, osdefs.CapSysModule, osdefs.CapSyslog, osdefs.CapSysRawio, osdefs.CapSysAdmin, osdefs.CapLinuxImmutable, osdefs.CapSysBoot,
+		osdefs.CapSysNice, osdefs.CapSysPacct, osdefs.CapSysTtyConfig, osdefs.CapSysTime, osdefs.CapWakeAlarm, osdefs.CapAuditRead, osdefs.CapAuditWrite, osdefs.CapAuditControl,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToAllow := []types.Syscall{
-		SysPtrace, SysArchPrctl, SysPersonality, SysSetuid, SysSetgid, SysPrctl, SysMadvise, SysMount, SysInitModule,
-		SysFinitModule, SysSetns, SysClone, SysUnshare,
+		osdefs.SysPtrace, osdefs.SysArchPrctl, osdefs.SysPersonality, osdefs.SysSetuid, osdefs.SysSetgid, osdefs.SysPrctl, osdefs.SysMadvise, osdefs.SysMount, osdefs.SysInitModule,
+		osdefs.SysFinitModule, osdefs.SysSetns, osdefs.SysClone, osdefs.SysUnshare,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 
@@ -167,12 +167,12 @@ func securityMemoryLockEnforce(profile secprofile.Profile) (secprofile.Profile, 
 	}
 
 	capsToAdd := []types.Capability{
-		CapIpcLock,
+		osdefs.CapIpcLock,
 	}
 	ociProfile.AddCaps(capsToAdd...)
 
 	syscallsToAllow := []types.Syscall{
-		SysMlock, SysMunlock, SysMlock2, SysMlockall, SysMunlockall,
+		osdefs.SysMlock, osdefs.SysMunlock, osdefs.SysMlock2, osdefs.SysMlockall, osdefs.SysMunlockall,
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 

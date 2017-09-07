@@ -1,4 +1,4 @@
-package defaults
+package osdefs
 
 import (
 	"github.com/docker/libentitlement/types"

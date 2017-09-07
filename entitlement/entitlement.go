@@ -1,7 +1,7 @@
 package entitlement
 
 import (
-	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile"
 )
 
 // FIXME: we should have a hierarchy in domains

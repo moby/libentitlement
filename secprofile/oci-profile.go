@@ -111,8 +111,6 @@ func allowSyscallWithArgs(seccompProfile *specs.LinuxSeccomp, syscallName types.
 
 	syscallNameToAllowStr := string(syscallName)
 
-	logrus.Errorf("Allowing syscall: %s", syscallNameToAllowStr)
-
 	for _, syscallRule := range seccompProfile.Syscalls {
 
 		if syscallRule.Action == specs.ActAllow {
@@ -134,8 +132,6 @@ func allowSyscallWithArgs(seccompProfile *specs.LinuxSeccomp, syscallName types.
 			Args:   syscallArgs,
 		}
 		seccompProfile.Syscalls = append(seccompProfile.Syscalls, newRule)
-
-		logrus.Errorf("Adding allow rule for syscall: %s", syscallNameToAllowStr)
 	}
 
 	return seccompProfile
