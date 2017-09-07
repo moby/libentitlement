@@ -1,12 +1,13 @@
 package defaults
 
 import (
+	"reflect"
+
 	"github.com/docker/libentitlement/entitlement"
 	"github.com/docker/libentitlement/secprofile"
 	"github.com/docker/libentitlement/secprofile/osdefs"
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"reflect"
 )
 
 const (

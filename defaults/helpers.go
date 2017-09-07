@@ -2,6 +2,7 @@ package defaults
 
 import (
 	"fmt"
+
 	"github.com/docker/libentitlement/secprofile"
 )
 

@@ -1,9 +1,10 @@
 package testutils
 
 import (
+	"reflect"
+
 	"github.com/docker/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
-	"reflect"
 )
 
 func capListContains(capList []string, capability types.Capability) bool {

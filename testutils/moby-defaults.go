@@ -3,12 +3,13 @@ package testutils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/docker/libentitlement/secprofile/osdefs"
-	"github.com/docker/libentitlement/types"
-	"github.com/opencontainers/runtime-spec/specs-go"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
+
+	"github.com/docker/libentitlement/secprofile/osdefs"
+	"github.com/docker/libentitlement/types"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 const (

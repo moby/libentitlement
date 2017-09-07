@@ -8,7 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 
 	"github.com/docker/libentitlement/parser"
-	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/docker/libentitlement/secprofile"
 )
 
 // IntEntitlementEnforceCallback should take the security profile to update with the constraints and
