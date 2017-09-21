@@ -1,3 +1,8 @@
+COVERDIR=.cover
+COVERPROFILE?=$(COVERDIR)/cover.out
+COVERMODE=count
+PKGS?=$(shell go list ./... | grep -v /vendor/)
+
 # run all lint functionality - excludes vendoring
 lint:
 	@echo "+ $@: gofmt, golint, govet, gocyclo, misspell, ineffassign"
@@ -18,4 +23,19 @@ lint:
 
 
 test: lint
-	@go test $(shell go list ./... | grep -v /vendor/)
+	@go test $(PKGS)
+
+# Generates the cover binaries and runs them all in serial
+cover: gen-cover covmerge
+	@go tool cover -html="$(COVERPROFILE)"
+
+gen-cover:
+	@mkdir -p "$(COVERDIR)"
+	python -u buildscripts/covertest.py --coverdir "$(COVERDIR)" --pkgs="$(PKGS)" --testopts="${TESTOPTS}"
+
+# This allows coverage for a package to come from tests in different package.
+# Requires that the following:
+# go get github.com/wadey/gocovmerge; go install github.com/wadey/gocovmerge
+covmerge:
+	@gocovmerge $(shell ls -1 $(COVERDIR)/* | tr "\n" " ") > $(COVERPROFILE)
+	@go tool cover -func="$(COVERPROFILE)"

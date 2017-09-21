@@ -1,11 +1,12 @@
-version: 2
-executorType: machine
-jobs:
-  build:
-    environment:
-      GOPATH: /home/circleci/.go_workspace
-    working_directory: $GOPATH/src/github.com/docker/libentitlement
-    steps:
-      - checkout
-      - run: go get -u github.com/golang/lint/golint github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
-      - run: cd $GOPATH/src/github.com/docker/libentitlement && make test
+machine:
+    pre:
+        - go get -u github.com/golang/lint/golint github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
+        - pip install codecov
+        - go get github.com/wadey/gocovmerge; go install github.com/wadey/gocovmerge
+
+test:
+    override:
+        - make test
+    post:
+        - make cover
+        - bash <(curl -s https://codecov.io/bash)
