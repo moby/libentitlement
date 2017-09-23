@@ -1,0 +1,8 @@
+/.vscode
+cover
+.cover
+*.swp
+.idea
+*.iml
+*.test
+coverage.out
