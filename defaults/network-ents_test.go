@@ -23,7 +23,7 @@ func TestNetworkNoneEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkNoneEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, entitlementID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)
@@ -78,7 +78,7 @@ func TestNetworkUserEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkUserEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, entitlementID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)
@@ -104,7 +104,7 @@ func TestNetworkProxyEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkProxyEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, entitlementID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)
@@ -145,7 +145,7 @@ func TestNetworkAdminEntitlementEnforce(t *testing.T) {
 	newProfile, err := ent.Enforce(ociProfile)
 	require.NoError(t, err, "Failed enforce while testing entitlement %s", entitlementID)
 
-	newOCIProfile, err := ociProfileConversionCheck(newProfile, NetworkAdminEntFullID)
+	newOCIProfile, err := ociProfileConversionCheck(newProfile, entitlementID)
 	require.NoError(t, err, "Failed converting to OCI profile while testing entitlement %s", entitlementID)
 
 	require.NotNil(t, newOCIProfile.OCI)

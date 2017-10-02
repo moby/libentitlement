@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"reflect"
 	"runtime"
 
 	"github.com/docker/libentitlement/secprofile/osdefs"
@@ -75,4 +76,28 @@ func getDefaultCapSet() map[types.Capability]bool {
 	}
 
 	return capSet
+}
+
+// GetNonDefaultMounts returns a mount set from the provided mount list without default Moby mounts that it may contain
+func GetNonDefaultMounts(mountList []specs.Mount) []specs.Mount {
+	defaultMountList := osdefs.DefaultMobyAllowedMounts
+
+	nonDefaultMounts := []specs.Mount{}
+
+	for _, mount := range mountList {
+		found := false
+
+		for _, defaultMount := range defaultMountList {
+			if reflect.DeepEqual(defaultMount, mount) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			nonDefaultMounts = append(nonDefaultMounts, mount)
+		}
+	}
+
+	return nonDefaultMounts
 }

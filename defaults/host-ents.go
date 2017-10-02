@@ -40,49 +40,8 @@ var (
 	hostProcessesAdminEntitlement = entitlement.NewVoidEntitlement(HostProcessesAdminEntFullID, hostProcessesAdminEntitlementEnforce)
 )
 
-var (
-	defaultMobyAllowedMounts = []specs.Mount{
-		{
-			Destination: "/proc",
-			Type:        "proc",
-			Source:      "proc",
-			Options:     []string{"nosuid", "noexec", "nodev"},
-		},
-		{
-			Destination: "/dev",
-			Type:        "tmpfs",
-			Source:      "tmpfs",
-			Options:     []string{"nosuid", "strictatime", "mode=755"},
-		},
-		{
-			Destination: "/dev/pts",
-			Type:        "devpts",
-			Source:      "devpts",
-			Options:     []string{"nosuid", "noexec", "newinstance", "ptmxmode=0666", "mode=0620", "gid=5"},
-		},
-		{
-			Destination: "/sys",
-			Type:        "sysfs",
-			Source:      "sysfs",
-			Options:     []string{"nosuid", "noexec", "nodev", "ro"},
-		},
-		{
-			Destination: "/sys/fs/cgroup",
-			Type:        "cgroup",
-			Source:      "cgroup",
-			Options:     []string{"ro", "nosuid", "noexec", "nodev"},
-		},
-		{
-			Destination: "/dev/mqueue",
-			Type:        "mqueue",
-			Source:      "mqueue",
-			Options:     []string{"nosuid", "noexec", "nodev"},
-		},
-	}
-)
-
 func isAllowedMount(mount specs.Mount) bool {
-	for _, allowedMount := range defaultMobyAllowedMounts {
+	for _, allowedMount := range osdefs.DefaultMobyAllowedMounts {
 		if reflect.DeepEqual(mount, allowedMount) {
 			return true
 		}
@@ -114,13 +73,13 @@ func hostDevicesNoneEntitlementEnforce(profile secprofile.Profile) (secprofile.P
 	ociProfile.OCI.Linux.ReadonlyPaths = append(ociProfile.OCI.Linux.ReadonlyPaths, "/sys")
 	ociProfile.OCI.Linux.MaskedPaths = append(ociProfile.OCI.Linux.MaskedPaths, "/proc/kcore")
 
-	ociProfile.OCI.Mounts = defaultMobyAllowedMounts
+	ociProfile.OCI.Mounts = osdefs.DefaultMobyAllowedMounts
 
 	return ociProfile, nil
 }
 
 /* Implements "host.devices.view" entitlement
- * - Sets all custom mounts to read-only
+ * - Sets all custom mount destinations to read-only
  */
 func hostDevicesViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Profile, error) {
 	ociProfile, err := ociProfileConversionCheck(profile, HostDevicesViewEntFullID)
@@ -175,7 +134,7 @@ func hostDevicesAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.
 	}
 
 	// FIXME: just remove read-only flags for default mounts and leave additional mounts as is
-	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(defaultMobyAllowedMounts)
+	ociProfile.OCI.Mounts = removeReadOnlyFlagMounts(ociProfile.OCI.Mounts)
 
 	ociProfile.OCI.Linux.MaskedPaths = []string{}
 

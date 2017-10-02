@@ -102,6 +102,7 @@ func securityViewEntitlementEnforce(profile secprofile.Profile) (secprofile.Prof
 		osdefs.SysPtrace,
 		osdefs.SysPersonality,
 		osdefs.SysMadvise,
+		// FIXME: try with: osdefs.SysPrctl,
 	}
 	ociProfile.BlockSyscalls(syscallsToBlock...)
 

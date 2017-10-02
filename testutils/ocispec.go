@@ -153,6 +153,33 @@ func AreSyscallsBlockedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallNames
 	return true
 }
 
+// isSyscallWithArgsAllowedBySeccomp checks that the provided syscall and args are whitelisted by the seccomp profile
+func isSyscallWithArgsAllowedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallName types.Syscall, syscallArgs []specs.LinuxSeccompArg) bool {
+	return !isSyscallWithArgsBlockedBySeccomp(seccompProfile, syscallName, syscallArgs)
+}
+
+// AreSeccompSyscallsWithArgsAllowed checks that the provided list of syscalls and args are whitelisted by the seccomp profile
+func AreSeccompSyscallsWithArgsAllowed(seccompProfile specs.LinuxSeccomp, syscallsWithArgs map[types.Syscall][]specs.LinuxSeccompArg) bool {
+	for syscallName, syscallArgs := range syscallsWithArgs {
+		if !isSyscallWithArgsAllowedBySeccomp(seccompProfile, syscallName, syscallArgs) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// AreSyscallsAllowedBySeccomp checks that the provided syscalls are whitelisted by the seccomp profile
+func AreSyscallsAllowedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallNames []types.Syscall) bool {
+	for _, syscallName := range syscallNames {
+		if !isSyscallWithArgsAllowedBySeccomp(seccompProfile, syscallName, []specs.LinuxSeccompArg{}) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // isCapBlocked checks that the provided capability is not allowed
 func isCapBlocked(linuxCaps specs.LinuxCapabilities, capability types.Capability) bool {
 	return !(capListContains(linuxCaps.Bounding, capability) || capListContains(linuxCaps.Permitted, capability) ||
@@ -272,6 +299,30 @@ func AreNamespacesActivated(nsList []specs.LinuxNamespace, namespaces []specs.Li
 func AreNamespacesDeactivated(nsList []specs.LinuxNamespace, namespaces []specs.LinuxNamespaceType) bool {
 	for _, namespace := range namespaces {
 		if isNamespaceActived(nsList, namespace) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// PathListMatchRefMount checks that the path list holds exactly the mount destinations of the provided mount list
+func PathListMatchRefMount(mountPathList []string, refMounts []specs.Mount) bool {
+	if len(mountPathList) != len(refMounts) {
+		return false
+	}
+
+	for _, mountPath := range mountPathList {
+		found := false
+
+		for _, mount := range refMounts {
+			if mount.Destination == mountPath {
+				found = true
+				break
+			}
+		}
+
+		if !found {
 			return false
 		}
 	}
