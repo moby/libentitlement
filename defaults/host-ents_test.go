@@ -140,3 +140,45 @@ func TestHostProcessesAdminEntitlementEnforce(t *testing.T) {
 	}
 	require.True(t, testutils.AreNamespacesDeactivated(newOCIProfile.OCI.Linux.Namespaces, nsToRemove))
 }
+
+func TestIsAllowedMount(t *testing.T) {
+	defaultMount := specs.Mount{
+		Destination: "/proc",
+		Type:        "proc",
+		Source:      "proc",
+		Options:     []string{"nosuid", "noexec", "nodev"},
+	}
+
+	require.True(t, isAllowedMount(defaultMount))
+
+	nonDefaultMount := specs.Mount{
+		Destination: "/foo/bar",
+		Type:        "foo",
+		Source:      "bar",
+		Options:     []string{},
+	}
+
+	require.False(t, isAllowedMount(nonDefaultMount))
+}
+
+func TestGetNonDefaultMount(t *testing.T) {
+	nonDefaultMount := []specs.Mount{
+		{
+			Destination: "/foo/bar",
+			Type:        "foo",
+			Source:      "bar",
+			Options:     []string{},
+		},
+	}
+	require.Equal(t, nonDefaultMount, testutils.GetNonDefaultMounts(nonDefaultMount))
+
+	defaultMount := []specs.Mount{
+		{
+			Destination: "/proc",
+			Type:        "proc",
+			Source:      "proc",
+			Options:     []string{"nosuid", "noexec", "nodev"},
+		},
+	}
+	require.Empty(t, testutils.GetNonDefaultMounts(defaultMount))
+}
