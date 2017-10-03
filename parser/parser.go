@@ -63,7 +63,7 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 	}
 
 	idAndArgString := stringList[len(stringList)-1]
-	domain = stringList[0 : len(stringList)-2]
+	domain = stringList[0 : len(stringList)-1]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator", entitlementFormat)
@@ -97,7 +97,7 @@ func ParseStringEntitlement(entitlementFormat string) (domain []string, id, valu
 	}
 
 	idAndArgString := stringList[len(stringList)-1]
-	domain = stringList[0 : len(stringList)-2]
+	domain = stringList[0 : len(stringList)-1]
 
 	if IsValidDomainNameList(domain) == false {
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: domain must be alphanumeric and can contain '-'. '.' is a domain separator", entitlementFormat)
