@@ -22,15 +22,13 @@ type StringEntitlement struct {
 	enforceCallback StringEntitlementEnforceCallback
 }
 
-// NewStringEntitlement instantiates a new StringEntitlement
+// NewStringEntitlement instantiates a new string Entitlement
 func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCallback) Entitlement {
 	domain, id, value, err := parser.ParseStringEntitlement(fullName)
 	if err != nil {
 		logrus.Errorf("Couldn't not create string entitlement for %v\n", fullName)
 		return nil
 	}
-
-	// FIXME: Add entitlement domain and the identifier to it
 
 	return &StringEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
 }

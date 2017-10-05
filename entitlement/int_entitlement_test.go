@@ -3,7 +3,16 @@ package entitlement
 import (
 	"fmt"
 	"testing"
+
+	"github.com/docker/libentitlement/secprofile"
 )
+
+func testIntEntitlementEnforce(profile secprofile.Profile, value int64) (secprofile.Profile, error) {
+	if value != 1 {
+		return nil, fmt.Errorf("Unexpected value passed to callback")
+	}
+	return profile, nil
+}
 
 func TestIntEntitlementNoCallback(t *testing.T) {
 	tests := map[Entitlement]*Result{
@@ -13,6 +22,11 @@ func TestIntEntitlementNoCallback(t *testing.T) {
 			Identifier: tuple{"x", nil},
 			Value:      tuple{"1", nil},
 			EnforceErr: fmt.Errorf("Invalid enforcement callback for entitlement foo.x"),
+		},
+		NewIntEntitlement("foo.x=1", testIntEntitlementEnforce): {
+			Domain:     tuple{"foo", nil},
+			Identifier: tuple{"x", nil},
+			Value:      tuple{"1", nil},
 		},
 		NewIntEntitlement("foo=a", nil):   nil,
 		NewIntEntitlement("foo", nil):     nil,
