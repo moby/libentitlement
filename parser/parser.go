@@ -81,11 +81,10 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
 	}
 
-	valueInt, err := strconv.Atoi(valueString)
+	value, err = strconv.ParseInt(valueString, 10, 64)
 	if err != nil {
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: entitlement argument must be a 64bits integer", entitlementFormat)
 	}
-	value = int64(valueInt)
 
 	return
 }

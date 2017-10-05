@@ -32,7 +32,7 @@ func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) 
 	}
 
 	// FIXME: Add entitlement domain and the identifier to it
-	return &IntEntitlement{domain: domain, id: id, value: int64(value), enforceCallback: callback}
+	return &IntEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
 }
 
 // Domain returns the entitlement's domain name as a string
