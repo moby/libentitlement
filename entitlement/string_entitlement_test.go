@@ -14,6 +14,10 @@ func testStringEntitlementEnforce(profile secprofile.Profile, value string) (sec
 	return profile, nil
 }
 
+func testStringEntitlementEnforceError(profile secprofile.Profile, value string) (secprofile.Profile, error) {
+	return nil, fmt.Errorf("An error occurred in the callback")
+}
+
 func TestStringEntitlement(t *testing.T) {
 	tests := map[Entitlement]*Result{
 		NewStringEntitlement("", nil): nil,
@@ -28,7 +32,12 @@ func TestStringEntitlement(t *testing.T) {
 			Identifier: tuple{"bar", nil},
 			Value:      tuple{"baz", nil},
 		},
-
+		NewStringEntitlement("foo.bar=baz", testStringEntitlementEnforceError): {
+			Domain:     tuple{"foo", nil},
+			Identifier: tuple{"bar", nil},
+			Value:      tuple{"baz", nil},
+			EnforceErr: fmt.Errorf("An error occurred in the callback"),
+		},
 		NewStringEntitlement("foo=a", nil): nil,
 		NewStringEntitlement("foo", nil):   nil,
 		NewStringEntitlement("foo.x", nil): nil,

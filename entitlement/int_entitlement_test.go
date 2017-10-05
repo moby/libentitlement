@@ -14,6 +14,10 @@ func testIntEntitlementEnforce(profile secprofile.Profile, value int64) (secprof
 	return profile, nil
 }
 
+func testIntEntitlementEnforceError(profile secprofile.Profile, value int64) (secprofile.Profile, error) {
+	return nil, fmt.Errorf("An error occurred in the callback")
+}
+
 func TestIntEntitlementNoCallback(t *testing.T) {
 	tests := map[Entitlement]*Result{
 		NewIntEntitlement("", nil): nil,
@@ -27,6 +31,12 @@ func TestIntEntitlementNoCallback(t *testing.T) {
 			Domain:     tuple{"foo", nil},
 			Identifier: tuple{"x", nil},
 			Value:      tuple{"1", nil},
+		},
+		NewIntEntitlement("foo.x=1", testIntEntitlementEnforceError): {
+			Domain:     tuple{"foo", nil},
+			Identifier: tuple{"x", nil},
+			Value:      tuple{"1", nil},
+			EnforceErr: fmt.Errorf("An error occurred in the callback"),
 		},
 		NewIntEntitlement("foo=a", nil):   nil,
 		NewIntEntitlement("foo", nil):     nil,
