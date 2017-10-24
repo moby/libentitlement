@@ -7,8 +7,12 @@ import (
 	"github.com/docker/libentitlement/secprofile"
 )
 
+// expectedIntEntitlementValue is the value our tests pass to the enforce
+// callback after processing the entitlement ID string.
+const expectedIntEntitlementValue = 1
+
 func testIntEntitlementEnforce(profile secprofile.Profile, value int64) (secprofile.Profile, error) {
-	if value != 1 {
+	if value != expectedIntEntitlementValue {
 		return nil, fmt.Errorf("Unexpected value passed to callback")
 	}
 	return profile, nil
