@@ -19,24 +19,20 @@ type IntEntitlementEnforceCallback func(secprofile.Profile, int64) (secprofile.P
 type IntEntitlement struct {
 	domain          []string
 	id              string
-	value           []int64
+	value           int64
 	enforceCallback IntEntitlementEnforceCallback
 }
 
-// NewIntEntitlement instantiates a new IntEntitlement
-func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) *IntEntitlement {
+// NewIntEntitlement instantiates a new integer Entitlement
+func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) Entitlement {
 	domain, id, value, err := parser.ParseIntEntitlement(fullName)
 	if err != nil {
-		logrus.Errorf("Couldn't not create int entitlement for %v\n", fullName)
+		logrus.Errorf("Could not create int entitlement for %v\n", fullName)
 		return nil
 	}
 
 	// FIXME: Add entitlement domain and the identifier to it
-
-	valueRef := make([]int64, 1)
-	valueRef[0] = int64(value)
-
-	return &IntEntitlement{domain: domain, id: id, value: valueRef, enforceCallback: callback}
+	return &IntEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
 }
 
 // Domain returns the entitlement's domain name as a string
@@ -65,13 +61,7 @@ func (e *IntEntitlement) Identifier() (string, error) {
 // Value returns the entitlement's value.
 // Note: Int entitlements need an explicit value, it can't be an empty string
 func (e *IntEntitlement) Value() (string, error) {
-	if e.value == nil || len(e.value) == 0 {
-		id, _ := e.Identifier()
-		domain, _ := e.Domain()
-		return "", fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
-	}
-
-	strValue := strconv.FormatInt(int64(e.value[1]), 10)
+	strValue := strconv.FormatInt(e.value, 10)
 
 	return strValue, nil
 }
@@ -79,19 +69,13 @@ func (e *IntEntitlement) Value() (string, error) {
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement int value
 func (e *IntEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if e.value == nil || len(e.value) == 0 {
-		id, _ := e.Identifier()
-		domain, _ := e.Domain()
-		return profile, fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
-	}
-
 	if e.enforceCallback == nil {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return profile, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforceCallback(profile, e.value[1])
+	newProfile, err := e.enforceCallback(profile, e.value)
 	if err != nil {
 		return profile, err
 	}

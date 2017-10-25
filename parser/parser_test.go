@@ -56,7 +56,7 @@ func TestParseIntEntitlement(t *testing.T) {
 		input          string
 		expectedDomain []string
 		expectedID     string
-		expectedValue  int
+		expectedValue  int64
 		expectedErr    error
 	}{
 		{

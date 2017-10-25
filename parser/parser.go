@@ -56,7 +56,7 @@ func ParseVoidEntitlement(entitlementFormat string) (domain []string, id string,
 }
 
 // ParseIntEntitlement parses an entitlement with the following format: "domain-name.identifier=int64-value"
-func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, value int, err error) {
+func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, value int64, err error) {
 	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: either domain or id missing", entitlementFormat)
@@ -81,7 +81,7 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
 	}
 
-	value, err = strconv.Atoi(valueString)
+	value, err = strconv.ParseInt(valueString, 10, 64)
 	if err != nil {
 		return nil, "", 0, fmt.Errorf("Parsing of int entitlement %s failed: entitlement argument must be a 64bits integer", entitlementFormat)
 	}
