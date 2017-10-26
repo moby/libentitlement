@@ -1,0 +1,14 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9.1
+    steps:
+      - checkout
+      - run: go get -u github.com/golang/lint/golint github.com/fzipp/gocyclo github.com/client9/misspell/cmd/misspell github.com/gordonklaus/ineffassign
+      - run: go get github.com/wadey/gocovmerge; go install github.com/wadey/gocovmerge
+      - run: sudo apt update && sudo apt install -y python python-pip && pip install codecov
+      - run: make test
+      - run: make cover
+      - run: bash <(curl -s https://codecov.io/bash)
