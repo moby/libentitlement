@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/docker/libentitlement/defaults"
-	"github.com/docker/libentitlement/entitlement"
-	secprofile "github.com/docker/libentitlement/secprofile"
-	"github.com/docker/libentitlement/testutils"
+	"github.com/moby/libentitlement/defaults"
+	"github.com/moby/libentitlement/entitlement"
+	secprofile "github.com/moby/libentitlement/secprofile"
+	"github.com/moby/libentitlement/testutils"
 	"github.com/stretchr/testify/require"
 )
 

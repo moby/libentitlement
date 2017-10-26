@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/docker/libentitlement/secprofile/osdefs"
-	"github.com/docker/libentitlement/types"
+	"github.com/moby/libentitlement/secprofile/osdefs"
+	"github.com/moby/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 

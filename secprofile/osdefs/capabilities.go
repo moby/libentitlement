@@ -1,7 +1,7 @@
 package osdefs
 
 import (
-	"github.com/docker/libentitlement/types"
+	"github.com/moby/libentitlement/types"
 )
 
 const (

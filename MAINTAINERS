@@ -1,6 +1,6 @@
 # Project maintainers file
 #
-# This file describes who runs the docker/libentitlement project and how.
+# This file describes who runs the moby/libentitlement project and how.
 # This is a living document - if you see something out of date or missing, speak up!
 #
 # It is structured to be consumable by both humans and programs.
@@ -24,5 +24,5 @@
 
 	[People.n4ss]
 	Name = "Nassim Eddequiouaq"
-	Email = "nassim.eddequiouaq@docker.com"
+	Email = "eddequiouaq.nassim@gmail.com"
 	GitHub = "n4ss"

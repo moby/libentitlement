@@ -3,7 +3,7 @@ package defaults
 import (
 	"fmt"
 
-	"github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/secprofile"
 )
 
 func ociProfileConversionCheck(profile secprofile.Profile, entitlementID string) (*secprofile.OCIProfile, error) {
