@@ -1,5 +1,5 @@
 # libentitlement
-[![CircleCI](https://circleci.com/gh/moby/libentitlement/tree/master.svg?style=shield)](https://circleci.com/gh/docker/libentitlement/tree/master) [![CodeCov](https://codecov.io/github/docker/libentitlement/coverage.svg?branch=master)](https://codecov.io/github/docker/libentitlement) [![GoReportCard](https://goreportcard.com/badge/moby/libentitlement)](https://goreportcard.com/report/github.com/moby/libentitlement)
+[![CircleCI](https://circleci.com/gh/moby/libentitlement/tree/master.svg?style=shield)](https://circleci.com/gh/docker/libentitlement/tree/master) [![CodeCov](https://codecov.io/github/moby/libentitlement/coverage.svg?branch=master)](https://codecov.io/github/moby/libentitlement) [![GoReportCard](https://goreportcard.com/badge/moby/libentitlement)](https://goreportcard.com/report/github.com/moby/libentitlement)
 
 `libentitlement` is currently WIP for a proof-of-concept that implements this
 [proposal](https://github.com/moby/moby/issues/32801) but would also handle on the
