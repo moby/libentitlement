@@ -1,5 +1,5 @@
 # libentitlement
-[![CircleCI](https://circleci.com/gh/docker/libentitlement/tree/master.svg?style=shield)](https://circleci.com/gh/docker/libentitlement/tree/master) [![CodeCov](https://codecov.io/github/docker/libentitlement/coverage.svg?branch=master)](https://codecov.io/github/docker/libentitlement) [![GoReportCard](https://goreportcard.com/badge/docker/libentitlement)](https://goreportcard.com/report/github.com/docker/libentitlement)
+[![CircleCI](https://circleci.com/gh/moby/libentitlement/tree/master.svg?style=shield)](https://circleci.com/gh/docker/libentitlement/tree/master) [![CodeCov](https://codecov.io/github/docker/libentitlement/coverage.svg?branch=master)](https://codecov.io/github/docker/libentitlement) [![GoReportCard](https://goreportcard.com/badge/moby/libentitlement)](https://goreportcard.com/report/github.com/moby/libentitlement)
 
 `libentitlement` is currently WIP for a proof-of-concept that implements this
 [proposal](https://github.com/moby/moby/issues/32801) but would also handle on the
@@ -13,7 +13,6 @@ A detailed documentation about this proposal and its rationale can be found [her
 Entitlements enable or disable different security features in a configuration profile. The list of entitlements in a configuration profile specify the exact privilege and capabilities that a container is allowed to access.
 
 The entitlement manager should be the source of truth regarding security configuration.
-
 
 ### Design
 
@@ -85,11 +84,11 @@ Default entitlements can be found in `defaults`. They implement the entitlements
 Currently implemented:
 - `network.none`, `network.user`, `network.proxy`,`network.admin`
 - `security.confined`, `security.view`, `security.admin`, `security.memory-lock`
+- `security.fs-read-only`
+- `host.devices.none`, `host.devices.admin`
+- `host.processes.none`, `host.processes.admin`
 
 Missing entitlements:
-- `host.devices.none`, `host.devices.view`, `host.devices.mount`
-- `host.processes.none`, `host.processes.view`, `host.processes.all`
-- `security.fs-read-only`
 - `debug`
 
 - resources limits/constraints: TBD
@@ -100,7 +99,7 @@ For Docker:
 For Kubernetes: TBD
 
 ## What's left
-- Implement missing default entitlements
+- Implement missing default entitlements for Moby and Kubernetes
 - Provide more helper functions to configure security profiles in
   `security_profile` package
 - Provide abstract API access management

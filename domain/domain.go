@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/libentitlement/parser"
+	"github.com/moby/libentitlement/parser"
 )
 
 // Domain defines the scoping for entitlements, ie Network

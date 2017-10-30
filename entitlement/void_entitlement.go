@@ -6,8 +6,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 
-	"github.com/docker/libentitlement/parser"
-	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/parser"
+	secprofile "github.com/moby/libentitlement/secprofile"
 )
 
 // VoidEntitlementEnforceCallback should take the security profile to update with the constraints

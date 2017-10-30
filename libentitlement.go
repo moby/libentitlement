@@ -6,10 +6,10 @@ import (
 
 	"github.com/Sirupsen/logrus"
 
-	"github.com/docker/libentitlement/defaults"
-	"github.com/docker/libentitlement/domain"
-	"github.com/docker/libentitlement/entitlement"
-	secprofile "github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/defaults"
+	"github.com/moby/libentitlement/domain"
+	"github.com/moby/libentitlement/entitlement"
+	secprofile "github.com/moby/libentitlement/secprofile"
 )
 
 // EntitlementsManager generates enforceable profiles from its entitlements and domains state

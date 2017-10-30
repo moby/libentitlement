@@ -3,10 +3,10 @@ package defaults
 import (
 	"reflect"
 
-	"github.com/docker/libentitlement/entitlement"
-	"github.com/docker/libentitlement/secprofile"
-	"github.com/docker/libentitlement/secprofile/osdefs"
-	"github.com/docker/libentitlement/types"
+	"github.com/moby/libentitlement/entitlement"
+	"github.com/moby/libentitlement/secprofile"
+	"github.com/moby/libentitlement/secprofile/osdefs"
+	"github.com/moby/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 

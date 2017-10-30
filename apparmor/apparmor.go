@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/docker/libentitlement/templates"
+	"github.com/moby/libentitlement/templates"
 )
 
 const (

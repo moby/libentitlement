@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/docker/libentitlement/secprofile/osdefs"
+	"github.com/moby/libentitlement/secprofile/osdefs"
 	"github.com/stretchr/testify/require"
 )
 

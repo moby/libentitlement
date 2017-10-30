@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/secprofile"
 )
 
 // expectedStrEntitlementValue is the value our tests pass to the enforce

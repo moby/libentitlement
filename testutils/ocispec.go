@@ -3,7 +3,7 @@ package testutils
 import (
 	"reflect"
 
-	"github.com/docker/libentitlement/types"
+	"github.com/moby/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 

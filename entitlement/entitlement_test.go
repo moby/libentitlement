@@ -3,7 +3,7 @@ package entitlement
 import (
 	"testing"
 
-	"github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/secprofile"
 	"github.com/stretchr/testify/require"
 )
 

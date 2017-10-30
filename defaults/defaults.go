@@ -1,6 +1,6 @@
 package defaults
 
-import "github.com/docker/libentitlement/entitlement"
+import "github.com/moby/libentitlement/entitlement"
 
 // DefaultEntitlements are the pre-defined entitlements to be consumed by default from libentitlement
 var DefaultEntitlements = map[string]entitlement.Entitlement{
