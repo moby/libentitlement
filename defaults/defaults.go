@@ -20,4 +20,6 @@ var DefaultEntitlements = map[string]entitlement.Entitlement{
 
 	HostProcessesNoneEntFullID:  entitlement.Entitlement(hostProcessesNoneEntitlement),
 	HostProcessesAdminEntFullID: entitlement.Entitlement(hostProcessesAdminEntitlement),
+
+	APIEntAllowID: entitlement.Entitlement(apiEntitlement),
 }
