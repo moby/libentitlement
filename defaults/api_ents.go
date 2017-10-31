@@ -9,16 +9,15 @@ import (
 )
 
 const (
-	engineDomain = "engine"
 
-	// FIXME: we need to define the possible domain, identifier and value for the entitlement.
-	APIEntID = engineDomain + ".api"
-	// e.g. defining an ent like so: "engine.api=swarm:all:allow"
-	APIEntAllowID = APIEntID + "=swarm:all:allow"
+	// api:engine.swarm=all:deny
+	APIEntAllowID = "api:engine.swarm=all:allow"
+	APIEntDenyID  = "api:engine.swarm=all:deny"
 )
 
 var (
 	apiEntitlement = entitlement.NewStringEntitlement(APIEntAllowID, apiEntitlementEnforce)
+	// TODO : Define stuff for the `deny` ID
 )
 
 func apiEntitlementEnforce(profile secprofile.Profile, apiSubsetAndAccess string) (secprofile.Profile, error) {
@@ -29,6 +28,8 @@ func apiEntitlementEnforce(profile secprofile.Profile, apiSubsetAndAccess string
 	}
 
 	apiSubsetAndAccessFields := strings.Split(apiSubsetAndAccess, ":")
+
+	fmt.Println("!! apiSubsetAndAccessFields", apiSubsetAndAccessFields)
 	if len(apiSubsetAndAccessFields) != 3 {
 		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
 	}
@@ -37,7 +38,7 @@ func apiEntitlementEnforce(profile secprofile.Profile, apiSubsetAndAccess string
 	apiSubset := apiSubsetAndAccessFields[1]
 	access := apiSubsetAndAccessFields[2]
 	if access != string(secprofile.Allow) && access != string(secprofile.Deny) {
-		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
+		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id=subset:[allow|deny]\"")
 	}
 
 	if ociProfile.APIAccess == nil {

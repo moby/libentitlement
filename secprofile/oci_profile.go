@@ -16,9 +16,8 @@ type APISubsetID string
 type APIAccess string
 
 const (
-	Allow  APIAccess = "allow"
-	Access APIAccess = "access"
-	Deny   APIAccess = "deny"
+	Allow APIAccess = "allow"
+	Deny  APIAccess = "deny"
 )
 
 type APIAccessConfig struct {
@@ -34,18 +33,18 @@ var OCIProfileType = ProfileType("oci-profile")
 // FIXME: Add error handling here if profile or subfields are not allocated */
 // Fixme add api access settings for Engine / Swarm / K8s?
 type OCIProfile struct {
-	OCI           *specs.Spec
-	AppArmorSetup *apparmor.ProfileData
-	APIAccess     *APIAccessConfig
+	OCI             *specs.Spec
+	AppArmorSetup   *apparmor.ProfileData
+	APIAccessConfig *APIAccessConfig
 }
 
 // NewOCIProfile instantiates an OCIProfile object with an OCI specification structure
 func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile {
 	if apparmorProfileName == "" || apparmorProfileName == "unconfined" {
 		return &OCIProfile{
-			OCI:           ociSpec,
-			AppArmorSetup: nil,
-			APIAccess:     &APIAccessConfig{make(map[APIID]map[APISubsetID]APIAccess)},
+			OCI:             ociSpec,
+			AppArmorSetup:   nil,
+			APIAccessConfig: &APIAccessConfig{make(map[APIID]map[APISubsetID]APIAccess)},
 		}
 	}
 
