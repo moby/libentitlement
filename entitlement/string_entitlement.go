@@ -68,6 +68,23 @@ func (e *StringEntitlement) Value() (string, error) {
 	return e.value, nil
 }
 
+// SetValue sets the entitlement's value.
+func (e *StringEntitlement) SetValue(value string) error {
+	if e == nil {
+		return fmt.Errorf("Invalid entitlement")
+	}
+
+	if value == "" {
+		id, _ := e.Identifier()
+		domain, _ := e.Domain()
+		return fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
+	}
+
+	e.value = value
+
+	return nil
+}
+
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
 func (e *StringEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {

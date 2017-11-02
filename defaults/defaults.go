@@ -1,6 +1,9 @@
 package defaults
 
-import "github.com/moby/libentitlement/entitlement"
+import (
+	"github.com/moby/libentitlement/entitlement"
+	"reflect"
+)
 
 // DefaultEntitlements are the pre-defined entitlements to be consumed by default from libentitlement
 var DefaultEntitlements = map[string]entitlement.Entitlement{
@@ -21,5 +24,15 @@ var DefaultEntitlements = map[string]entitlement.Entitlement{
 	HostProcessesNoneEntFullID:  entitlement.Entitlement(hostProcessesNoneEntitlement),
 	HostProcessesAdminEntFullID: entitlement.Entitlement(hostProcessesAdminEntitlement),
 
-	APIEntAllowID: entitlement.Entitlement(apiEntitlement),
+	APIEntFullID: entitlement.Entitlement(apiEntitlement),
+}
+
+// GetDefaultEntitlement returns a copy of a default entitlement (first return value) if present (second return value)
+func GetDefaultEntitlement(entFullID string) (entitlement.Entitlement, bool) {
+	ent, ok := DefaultEntitlements[entFullID]
+	if !ok {
+		return nil, false
+	}
+
+	return reflect.New(reflect.ValueOf(ent).Elem().Type()).Interface().(entitlement.Entitlement), true
 }

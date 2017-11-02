@@ -4,49 +4,108 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/moby/libentitlement/entitlement"
 	"github.com/moby/libentitlement/secprofile"
 )
 
 const (
+	// APIEntFullID is the API entitlement identifier; the value format is: "api:api-id:subset:[allow|deny]"
+	// ex: "api:engine.swarm:all:allow"
+	APIEntFullID = "api"
 
-	// api:engine.swarm=all:deny
-	APIEntAllowID = "api:engine.swarm.all=allow"
-	APIEntDenyID  = "api:engine.swarm.all=deny"
+	// APIFullControl specifies access control for the whole api
+	APIFullControl = "all"
+)
+
+// Default known APIs and API subsets to control access of
+const (
+	// EngineAPI defines the Moby-Engine API
+	EngineAPI = "engine"
+
+	// SwarmAPI defines the Moby-Engine Swarm API
+	SwarmAPI = "swarm"
 )
 
 var (
-	apiEntitlement = entitlement.NewStringEntitlement(APIEntAllowID, apiEntitlementEnforce)
-	// TODO : Define stuff for the `deny` ID
+	apiEntitlement = entitlement.NewStringEntitlement(APIEntFullID, apiEntitlementEnforce)
 )
 
-func apiEntitlementEnforce(profile secprofile.Profile, apiSubsetAndAccess string) (secprofile.Profile, error) {
-	fmt.Println("enforce called with", apiSubsetAndAccess)
+// GetSwarmAPIIdentifier returns the full Swarm API identifier
+func GetSwarmAPIIdentifier() secprofile.APIID {
+	return secprofile.APIID(fmt.Sprintf("%s.%s", EngineAPI, SwarmAPI))
+}
+
+/*IsSwarmAPIControlled checks if Moby Swarm API is controlled and whether it's allowed or not
+ * Return values are the following:
+ * isControlled - if no error is encountered, whether the Swarm API is currently controlled by the entitlements
+ * access - if Swarm API is currently controlled, this return value holds the allow/deny access requested
+ * err - error returned if an issue is encountered
+ */
+func IsSwarmAPIControlled(profile secprofile.Profile) (isControlled bool, access secprofile.APIAccess, err error) {
+	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
+	if err != nil {
+		return false, secprofile.Allow, err
+	}
+
+	if ociProfile.APIAccessConfig == nil {
+		return false, secprofile.Allow, fmt.Errorf("OCI profile's APIAccess field nil")
+	}
+
+	swarmAPIFullID := GetSwarmAPIIdentifier()
+
+	apiSubset, ok := ociProfile.APIAccessConfig.APIRights[swarmAPIFullID]
+	if !ok || apiSubset == nil {
+		return false, secprofile.Allow, nil
+	}
+
+	access, ok = apiSubset[APIFullControl]
+	if !ok {
+		return false, secprofile.Allow, nil
+	}
+
+	return true, access, nil
+}
+
+func apiEntitlementEnforce(profile secprofile.Profile, apiToAccess string) (secprofile.Profile, error) {
+	logrus.Debugf("API entitlement for %s", apiToAccess)
+
 	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
 	if err != nil {
 		return nil, err
-	}
-
-	apiSubsetAndAccessFields := strings.Split(apiSubsetAndAccess, ":")
-
-	fmt.Println("!! apiSubsetAndAccessFields", apiSubsetAndAccessFields)
-	if len(apiSubsetAndAccessFields) != 3 {
-		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
-	}
-
-	apiID := apiSubsetAndAccessFields[0]
-	apiSubset := apiSubsetAndAccessFields[1]
-	access := apiSubsetAndAccessFields[2]
-	if access != string(secprofile.Allow) && access != string(secprofile.Deny) {
-		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id=subset:[allow|deny]\"")
 	}
 
 	if ociProfile.APIAccessConfig == nil {
 		return nil, fmt.Errorf("OCI profile's APIAccess field nil")
 	}
 
-	apiIDSubsets := ociProfile.APIAccessConfig.APIRights[secprofile.APIID(apiID)]
-	apiIDSubsets[secprofile.APISubsetID(apiSubset)] = secprofile.APIAccess(access)
+	apiToAccessFields := strings.Split(apiToAccess, ":")
 
-	return ociProfile, nil
+	logrus.Debugf("Fields found for %s: %v", apiToAccess, apiToAccessFields)
+	if len(apiToAccessFields) != 3 {
+		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
+	}
+
+	apiIDStr := apiToAccessFields[0]
+	apiSubsetStr := apiToAccessFields[1]
+	accessStr := apiToAccessFields[2]
+
+	apiID := secprofile.APIID(apiIDStr)
+	apiSubset := secprofile.APISubsetID(apiSubsetStr)
+	access := secprofile.APIAccess(accessStr)
+
+	switch access {
+	case secprofile.Deny, secprofile.Allow:
+		apiIDSubsets, ok := ociProfile.APIAccessConfig.APIRights[apiID]
+		if !ok {
+			ociProfile.APIAccessConfig.APIRights[apiID] = make(map[secprofile.APISubsetID]secprofile.APIAccess)
+			apiIDSubsets = ociProfile.APIAccessConfig.APIRights[apiID]
+		}
+
+		apiIDSubsets[apiSubset] = access
+
+		return ociProfile, nil
+	}
+
+	return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
 }

@@ -9,17 +9,24 @@ import (
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
+// APIID is the API identifier type
 type APIID string
 
+// APISubsetID is the API subset identifier type
 type APISubsetID string
 
+// APIAccess defines whether or not an API access is allowed or not
 type APIAccess string
 
 const (
+	// Allow indicates that an API access is allowed
 	Allow APIAccess = "allow"
-	Deny  APIAccess = "deny"
+
+	// Deny indicates that an API access is denied
+	Deny APIAccess = "deny"
 )
 
+// APIAccessConfig contains an access rule for each subset of controlled APIs
 type APIAccessConfig struct {
 	APIRights map[APIID]map[APISubsetID]APIAccess
 }
@@ -40,15 +47,21 @@ type OCIProfile struct {
 
 // NewOCIProfile instantiates an OCIProfile object with an OCI specification structure
 func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile {
+	apiAccessConfig := &APIAccessConfig{make(map[APIID]map[APISubsetID]APIAccess)}
+
 	if apparmorProfileName == "" || apparmorProfileName == "unconfined" {
 		return &OCIProfile{
 			OCI:             ociSpec,
 			AppArmorSetup:   nil,
-			APIAccessConfig: &APIAccessConfig{make(map[APIID]map[APISubsetID]APIAccess)},
+			APIAccessConfig: apiAccessConfig,
 		}
 	}
 
-	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewEmptyProfileData(apparmorProfileName)}
+	return &OCIProfile{
+		OCI:             ociSpec,
+		AppArmorSetup:   apparmor.NewEmptyProfileData(apparmorProfileName),
+		APIAccessConfig: apiAccessConfig,
+	}
 }
 
 // GetType returns the OCI profile type identifier

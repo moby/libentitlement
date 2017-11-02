@@ -3,21 +3,43 @@ package defaults
 import (
 	"fmt"
 	"testing"
+	"github.com/stretchr/testify/require"
+	"reflect"
 
+	"github.com/moby/libentitlement/entitlement"
 	"github.com/moby/libentitlement/secprofile"
 	"github.com/moby/libentitlement/testutils"
-	"github.com/stretchr/testify/require"
 )
 
 func TestApiEntitlementEnforce(t *testing.T) {
-	entitlementID := APIEntAllowID
+	entitlementID := APIEntFullID
 	require.NotNil(t, DefaultEntitlements[entitlementID])
 
 	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
-	apiEnt := DefaultEntitlements[entitlementID]
 
-	_, err := apiEnt.Enforce(ociProfile)
-	require.Equal(t, fmt.Errorf("OCI profile's APIAccess field nil"), err)
+	apiEnt, ok := GetDefaultEntitlement(entitlementID)
+	require.True(t, ok, fmt.Errorf("API entitlement not present"))
+
+	testAPIIDStr := "foo"
+	testAPIID := secprofile.APIID(testAPIIDStr)
+	testAPIValue := fmt.Sprintf("%s:%s:%s", testAPIIDStr, APIFullControl, string(secprofile.Allow))
+
+	apiStrEnt := entitlement.StringEntitlement(apiEnt)
+	err := apiStrEnt.SetValue(testAPIValue)
+	require.NoError(t, err)
+
+	refAPIAccessConfig := secprofile.APIAccessConfig{APIRights: make(map[secprofile.APIID]map[secprofile.APISubsetID]secprofile.APIAccess)}
+	refAPIAccessConfig.APIRights[testAPIID] = map[secprofile.APISubsetID]secprofile.APIAccess{
+		secprofile.APISubsetID(APIFullControl): secprofile.Allow,
+	}
+
+	_, err = apiEnt.Enforce(ociProfile)
+	// Check equality on API identifier
+	require.Equal(t, reflect.ValueOf(ociProfile.APIAccessConfig.APIRights).MapKeys(), reflect.ValueOf(refAPIAccessConfig.APIRights).MapKeys())
+	// Check equality on API subsets identifier
+	require.Equal(t, reflect.ValueOf(ociProfile.APIAccessConfig.APIRights[testAPIID]).MapKeys(), reflect.ValueOf(refAPIAccessConfig.APIRights[testAPIID]).MapKeys())
+	// Check equality on the access rule
+	require.Equal(t, ociProfile.APIAccessConfig.APIRights[testAPIID][secprofile.APISubsetID(APIFullControl)], refAPIAccessConfig.APIRights[testAPIID][secprofile.APISubsetID(APIFullControl)])
 
 	//	require.NoError(t, err, "Failed to enforce while testing entitlement %s", entitlementID)
 
