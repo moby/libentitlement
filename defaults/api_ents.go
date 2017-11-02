@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/docker/libentitlement/entitlement"
-	"github.com/docker/libentitlement/secprofile"
+	"github.com/moby/libentitlement/entitlement"
+	"github.com/moby/libentitlement/secprofile"
 )
 
 const (
 
 	// api:engine.swarm=all:deny
-	APIEntAllowID = "api:engine.swarm=all:allow"
-	APIEntDenyID  = "api:engine.swarm=all:deny"
+	APIEntAllowID = "api:engine.swarm.all=allow"
+	APIEntDenyID  = "api:engine.swarm.all=deny"
 )
 
 var (
@@ -41,11 +41,11 @@ func apiEntitlementEnforce(profile secprofile.Profile, apiSubsetAndAccess string
 		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id=subset:[allow|deny]\"")
 	}
 
-	if ociProfile.APIAccess == nil {
+	if ociProfile.APIAccessConfig == nil {
 		return nil, fmt.Errorf("OCI profile's APIAccess field nil")
 	}
 
-	apiIDSubsets := ociProfile.APIAccess.APIRights[secprofile.APIID(apiID)]
+	apiIDSubsets := ociProfile.APIAccessConfig.APIRights[secprofile.APIID(apiID)]
 	apiIDSubsets[secprofile.APISubsetID(apiSubset)] = secprofile.APIAccess(access)
 
 	return ociProfile, nil

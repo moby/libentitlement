@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/docker/libentitlement/secprofile"
-	"github.com/docker/libentitlement/testutils"
+	"github.com/moby/libentitlement/secprofile"
+	"github.com/moby/libentitlement/testutils"
 	"github.com/stretchr/testify/require"
 )
 
