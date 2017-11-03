@@ -90,12 +90,9 @@ func ParseIntEntitlement(entitlementFormat string) (domain []string, id string, 
 	return
 }
 
-// ParseStringEntitlement parses an entitlement with the following format: "domain-name:identifier=string-value"
-// api-id:subset.subsubset.subcomcomponent=allow
-// domain-name:identifier=string-value
+// ParseStringEntitlement parses an entitlement with the following format: "domain-name.identifier=string-value"
 func ParseStringEntitlement(entitlementFormat string) (domain []string, id, value string, err error) {
-	fmt.Println("Entitlement string passed: ", entitlementFormat)
-	stringList := strings.Split(entitlementFormat, ":")
+	stringList := strings.Split(entitlementFormat, ".")
 	if len(stringList) < 2 {
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: either domain or id missing", entitlementFormat)
 	}
