@@ -2,7 +2,6 @@ package defaults
 
 import (
 	"github.com/moby/libentitlement/entitlement"
-	"reflect"
 )
 
 // DefaultEntitlements are the pre-defined entitlements to be consumed by default from libentitlement
@@ -34,5 +33,5 @@ func GetDefaultEntitlement(entFullID string) (entitlement.Entitlement, bool) {
 		return nil, false
 	}
 
-	return reflect.New(reflect.ValueOf(ent).Elem().Type()).Interface().(entitlement.Entitlement), true
+	return ent, true
 }
