@@ -51,6 +51,7 @@ func TestParseVoidEntitlement(t *testing.T) {
 		require.Equal(t, tc.expectedErr, err)
 	}
 }
+
 func TestParseIntEntitlement(t *testing.T) {
 	testCases := []struct {
 		input          string
@@ -153,10 +154,10 @@ func TestParseStringEntitlement(t *testing.T) {
 		},
 		{
 			input:          "foo.bar",
-			expectedDomain: []string(nil),
-			expectedID:     "",
+			expectedDomain: []string{"foo"},
+			expectedID:     "bar",
 			expectedValue:  "",
-			expectedErr:    fmt.Errorf("Parsing of string entitlement foo.bar failed: format required 'domain-name.identifier=param'"),
+			expectedErr:    nil,
 		},
 		{
 			input:          "foo.@#$=baz",

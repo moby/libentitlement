@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
@@ -107,12 +108,19 @@ func ParseStringEntitlement(entitlementFormat string) (domain []string, id, valu
 	}
 
 	idAndArgList := strings.Split(idAndArgString, "=")
-	if len(idAndArgList) != 2 {
+	id = idAndArgList[0]
+
+	if len(idAndArgList) > 2 {
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: format required 'domain-name.identifier=param'", entitlementFormat)
 	}
 
-	id = idAndArgList[0]
-	value = idAndArgList[1]
+	// Default entitlements can be stored in the default entitlements map without a value (ex: API entitlement)
+	if len(idAndArgList) < 2 {
+		logrus.Warnf("Warning - No string argument provided to entitlement %s, format required 'domain-name.identifier=param'", entitlementFormat)
+		value = ""
+	} else {
+		value = idAndArgList[1]
+	}
 
 	if IsValidIdentifier(id) == false {
 		return nil, "", "", fmt.Errorf("Parsing of string entitlement %s failed: identifier must be alphanumeric and can contain '-'", entitlementFormat)
