@@ -17,18 +17,18 @@ type VoidEntitlementEnforceCallback func(secprofile.Profile) (secprofile.Profile
 type VoidEntitlement struct {
 	domain          []string
 	id              string
-	enforceCallback VoidEntitlementEnforceCallback
+	EnforceCallback VoidEntitlementEnforceCallback
 }
 
 // NewVoidEntitlement instantiates a new VoidEntitlement
 func NewVoidEntitlement(fullName string, callback VoidEntitlementEnforceCallback) *VoidEntitlement {
 	domain, id, err := parser.ParseVoidEntitlement(fullName)
 	if err != nil {
-		logrus.Errorf("Couldn't not create entitlement for %v\n", fullName)
+		logrus.Errorf("Couldn't not create entitlement for %v", fullName)
 		return nil
 	}
 
-	return &VoidEntitlement{domain: domain, id: id, enforceCallback: callback}
+	return &VoidEntitlement{domain: domain, id: id, EnforceCallback: callback}
 }
 
 // Domain returns the entitlement's domain name
@@ -65,11 +65,11 @@ func (e *VoidEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profil
 	domain, _ := e.Domain()
 	id, _ := e.Identifier()
 
-	if e.enforceCallback == nil {
+	if e.EnforceCallback == nil {
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforceCallback(profile)
+	newProfile, err := e.EnforceCallback(profile)
 	if err != nil {
 		return nil, err
 	}

@@ -44,7 +44,12 @@ func TestStringEntitlement(t *testing.T) {
 		},
 		NewStringEntitlement("foo=a", nil): nil,
 		NewStringEntitlement("foo", nil):   nil,
-		NewStringEntitlement("foo.x", nil): nil,
+		NewStringEntitlement("foo.x", nil): {
+			Domain:     tuple{"foo", nil},
+			Identifier: tuple{"x", nil},
+			Value:      tuple{"", fmt.Errorf("Invalid value for entitlement foo.x")},
+			EnforceErr: fmt.Errorf("Invalid value for entitlement foo.x"),
+		},
 		NewStringEntitlement("foo.bar.baz=qux", nil): {
 			Domain:     tuple{"foo.bar", nil},
 			Identifier: tuple{"baz", nil},

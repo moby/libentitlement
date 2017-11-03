@@ -20,19 +20,19 @@ type IntEntitlement struct {
 	domain          []string
 	id              string
 	value           int64
-	enforceCallback IntEntitlementEnforceCallback
+	EnforceCallback IntEntitlementEnforceCallback
 }
 
 // NewIntEntitlement instantiates a new integer Entitlement
 func NewIntEntitlement(fullName string, callback IntEntitlementEnforceCallback) Entitlement {
 	domain, id, value, err := parser.ParseIntEntitlement(fullName)
 	if err != nil {
-		logrus.Errorf("Could not create int entitlement for %v\n", fullName)
+		logrus.Errorf("Could not create int entitlement for %v", fullName)
 		return nil
 	}
 
 	// FIXME: Add entitlement domain and the identifier to it
-	return &IntEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
+	return &IntEntitlement{domain: domain, id: id, value: value, EnforceCallback: callback}
 }
 
 // Domain returns the entitlement's domain name as a string
@@ -69,13 +69,13 @@ func (e *IntEntitlement) Value() (string, error) {
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement int value
 func (e *IntEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
-	if e.enforceCallback == nil {
+	if e.EnforceCallback == nil {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return profile, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforceCallback(profile, e.value)
+	newProfile, err := e.EnforceCallback(profile, e.value)
 	if err != nil {
 		return profile, err
 	}
