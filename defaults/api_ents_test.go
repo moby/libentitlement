@@ -2,9 +2,10 @@ package defaults
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/moby/libentitlement/entitlement"
 	"github.com/moby/libentitlement/secprofile"
@@ -38,4 +39,18 @@ func TestApiEntitlementEnforce(t *testing.T) {
 
 	// Check equality on API identifiers, API subset identifiers and API access rules
 	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
+}
+
+func TestGetSwarmAPIIdentifier(t *testing.T) {
+	require.Equal(t, GetSwarmAPIIdentifier(), secprofile.APIID("engine.swarm"))
+}
+
+func TestIsSwarmAPIControlled(t *testing.T) {
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
+	isControlled, access, err := IsSwarmAPIControlled(ociProfile)
+	require.False(t, isControlled)
+	require.Equal(t, access, secprofile.Allow)
+	require.NoError(t, err)
+
+	// FIXME: We need more error test cases
 }
