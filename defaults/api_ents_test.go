@@ -12,7 +12,7 @@ import (
 	"github.com/moby/libentitlement/testutils"
 )
 
-func TestApiEntitlementEnforce(t *testing.T) {
+func TestApiEntitlementEnforceAllow(t *testing.T) {
 	entitlementID := APIEntFullID
 
 	apiEnt, ok := GetDefaultEntitlement(entitlementID)
@@ -22,6 +22,7 @@ func TestApiEntitlementEnforce(t *testing.T) {
 
 	testAPIIDStr := "foo"
 	testAPIID := secprofile.APIID(testAPIIDStr)
+	// Generate "foo:all:allow"
 	testAPIValue := fmt.Sprintf("%s:%s:%s", testAPIIDStr, APIFullControl, string(secprofile.Allow))
 
 	apiStrEnt, ok := apiEnt.(*entitlement.StringEntitlement)
@@ -51,6 +52,50 @@ func TestIsSwarmAPIControlled(t *testing.T) {
 	require.False(t, isControlled)
 	require.Equal(t, access, secprofile.Allow)
 	require.NoError(t, err)
+}
 
-	// FIXME: We need more error test cases
+func TestApiEntitlementOverrideRule(t *testing.T) {
+	entitlementID := APIEntFullID
+
+	apiEnt, ok := GetDefaultEntitlement(entitlementID)
+	require.True(t, ok, fmt.Errorf("API entitlement not present"))
+
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
+
+	apiStrEnt, ok := apiEnt.(*entitlement.StringEntitlement)
+	require.True(t, ok, fmt.Errorf("API entitlement is not a string entitlement"))
+
+	testAPIIDStr := "foo"
+	testAPIID := secprofile.APIID(testAPIIDStr)
+
+	// Generate "foo:all:allow"
+	testAPIAllowValue := fmt.Sprintf("%s:%s:%s", testAPIIDStr, APIFullControl, string(secprofile.Allow))
+
+	// Generate "foo:all:deny"
+	testAPIDenyValue := fmt.Sprintf("%s:%s:%s", testAPIIDStr, APIFullControl, string(secprofile.Deny))
+
+	err := apiStrEnt.SetValue(testAPIAllowValue)
+	require.NoError(t, err)
+
+	refAPIRights := make(map[secprofile.APIID]map[secprofile.APISubsetID]secprofile.APIAccess)
+	refAPIRights[testAPIID] = map[secprofile.APISubsetID]secprofile.APIAccess{
+		secprofile.APISubsetID(APIFullControl): secprofile.Allow,
+	}
+
+	_, err = apiEnt.Enforce(ociProfile)
+	require.NoError(t, err)
+
+	// Check equality on API identifiers, API subset identifiers and API access rules
+	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
+
+	err = apiStrEnt.SetValue(testAPIDenyValue)
+	require.NoError(t, err)
+
+	_, err = apiEnt.Enforce(ociProfile)
+	require.NoError(t, err)
+
+	refAPIRights[testAPIID][secprofile.APISubsetID(APIFullControl)] = secprofile.Deny
+
+	// Check equality on API identifiers, API subset identifiers and API access rules
+	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
 }
