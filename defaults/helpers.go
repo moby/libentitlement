@@ -7,6 +7,10 @@ import (
 )
 
 func ociProfileConversionCheck(profile secprofile.Profile, entitlementID string) (*secprofile.OCIProfile, error) {
+	if profile == nil {
+		return nil, fmt.Errorf("profile is nil for %s", entitlementID)
+	}
+
 	if profile.GetType() != secprofile.OCIProfileType {
 		return nil, fmt.Errorf("%s not implemented for non-OCI profiles", entitlementID)
 	}

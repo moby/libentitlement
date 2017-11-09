@@ -47,11 +47,74 @@ func TestGetSwarmAPIIdentifier(t *testing.T) {
 }
 
 func TestIsSwarmAPIControlled(t *testing.T) {
-	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
-	isControlled, access, err := IsSwarmAPIControlled(ociProfile)
-	require.False(t, isControlled)
-	require.Equal(t, access, secprofile.Allow)
-	require.NoError(t, err)
+	type test struct {
+		profile          secprofile.Profile
+		wantIsControlled bool
+		wantAccess       secprofile.APIAccess
+		wantErr          error
+	}
+
+	tests := []test{
+		{
+			profile:          nil,
+			wantIsControlled: false,
+			wantAccess:       secprofile.Allow,
+			wantErr:          fmt.Errorf("profile is nil for %s", APIEntFullID),
+		},
+		{
+			profile: &secprofile.OCIProfile{
+				OCI:             nil,
+				AppArmorSetup:   nil,
+				APIAccessConfig: nil,
+			},
+			wantIsControlled: false,
+			wantAccess:       secprofile.Allow,
+			wantErr:          fmt.Errorf("OCI profile's APIAccess field nil"),
+		},
+		{
+			profile:          secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile"),
+			wantIsControlled: false,
+			wantAccess:       secprofile.Allow,
+			wantErr:          nil,
+		},
+		{
+			profile: &secprofile.OCIProfile{
+				OCI:           nil,
+				AppArmorSetup: nil,
+				APIAccessConfig: &secprofile.APIAccessConfig{
+					APIRights: map[secprofile.APIID]map[secprofile.APISubsetID]secprofile.APIAccess{
+						GetSwarmAPIIdentifier(): {},
+					},
+				},
+			},
+			wantIsControlled: false,
+			wantAccess:       secprofile.Allow,
+			wantErr:          nil,
+		},
+		{
+			profile: &secprofile.OCIProfile{
+				OCI:           nil,
+				AppArmorSetup: nil,
+				APIAccessConfig: &secprofile.APIAccessConfig{
+					APIRights: map[secprofile.APIID]map[secprofile.APISubsetID]secprofile.APIAccess{
+						GetSwarmAPIIdentifier(): {
+							APIFullControl: secprofile.Deny,
+						},
+					},
+				},
+			},
+			wantIsControlled: true,
+			wantAccess:       secprofile.Deny,
+			wantErr:          nil,
+		},
+	}
+
+	for _, test := range tests {
+		isControlled, access, err := IsSwarmAPIControlled(test.profile)
+		require.Equal(t, test.wantIsControlled, isControlled)
+		require.Equal(t, test.wantAccess, access)
+		require.Equal(t, test.wantErr, err)
+	}
 }
 
 func TestApiEntitlementOverrideRule(t *testing.T) {

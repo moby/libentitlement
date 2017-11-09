@@ -43,7 +43,7 @@ func GetSwarmAPIIdentifier() secprofile.APIID {
  * err - error returned if an issue is encountered
  */
 func IsSwarmAPIControlled(profile secprofile.Profile) (isControlled bool, access secprofile.APIAccess, err error) {
-	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, APIEntFullID)
 	if err != nil {
 		return false, secprofile.Allow, err
 	}
