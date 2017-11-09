@@ -12,7 +12,7 @@ import (
 	"github.com/moby/libentitlement/testutils"
 )
 
-func TestApiEntitlementEnforceAllow(t *testing.T) {
+func TestAPIEntitlementEnforceAllow(t *testing.T) {
 	entitlementID := APIEntFullID
 
 	apiEnt, ok := GetDefaultEntitlement(entitlementID)
@@ -37,9 +37,32 @@ func TestApiEntitlementEnforceAllow(t *testing.T) {
 	}
 
 	_, err = apiEnt.Enforce(ociProfile)
+	require.NoError(t, err)
 
 	// Check equality on API identifiers, API subset identifiers and API access rules
 	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
+}
+
+func TestAPIEntitlementEnforceAPIAccessStringError(t *testing.T) {
+	entitlementID := APIEntFullID
+
+	apiEnt, ok := GetDefaultEntitlement(entitlementID)
+	require.True(t, ok, fmt.Errorf("API entitlement not present"))
+
+	ociProfile := secprofile.NewOCIProfile(testutils.TestSpec(), "test-profile")
+
+	testAPIIDStr := "foo"
+	// Generate "foo:all"
+	testAPIValue := fmt.Sprintf("%s:%s", testAPIIDStr, APIFullControl)
+
+	apiStrEnt, ok := apiEnt.(*entitlement.StringEntitlement)
+	require.True(t, ok, fmt.Errorf("API entitlement is not a string entitlement"))
+
+	err := apiStrEnt.SetValue(testAPIValue)
+	require.NoError(t, err)
+
+	_, err = apiEnt.Enforce(ociProfile)
+	require.Equal(t, err, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\""))
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
@@ -117,7 +140,7 @@ func TestIsSwarmAPIControlled(t *testing.T) {
 	}
 }
 
-func TestApiEntitlementOverrideRule(t *testing.T) {
+func TestAPIEntitlementOverrideRule(t *testing.T) {
 	entitlementID := APIEntFullID
 
 	apiEnt, ok := GetDefaultEntitlement(entitlementID)
