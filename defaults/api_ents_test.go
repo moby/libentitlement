@@ -63,6 +63,14 @@ func TestAPIEntitlementEnforceAPIAccessStringError(t *testing.T) {
 
 	_, err = apiEnt.Enforce(ociProfile)
 	require.Equal(t, err, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\""))
+	// Generate "foo:all:baz"
+	testAPIValue = fmt.Sprintf("%s:%s:baz", testAPIIDStr, APIFullControl)
+
+	err = apiStrEnt.SetValue(testAPIValue)
+	require.NoError(t, err)
+
+	_, err = apiEnt.Enforce(ociProfile)
+	require.Equal(t, err, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\""))
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
