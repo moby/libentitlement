@@ -43,7 +43,15 @@ func TestAPIEntitlementEnforceAllow(t *testing.T) {
 	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
 }
 
-func TestAPIEntitlementEnforceAPIAccessStringError(t *testing.T) {
+type invalidProfile struct {
+	foo int
+}
+
+func (p *invalidProfile) GetType() secprofile.ProfileType {
+	return secprofile.ProfileType("invalid-profile")
+}
+
+func TestAPIEntitlementEnforceErrors(t *testing.T) {
 	entitlementID := APIEntFullID
 
 	apiEnt, ok := GetDefaultEntitlement(entitlementID)
@@ -71,6 +79,9 @@ func TestAPIEntitlementEnforceAPIAccessStringError(t *testing.T) {
 
 	_, err = apiEnt.Enforce(ociProfile)
 	require.Equal(t, err, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\""))
+
+	_, err = apiEnt.Enforce(&invalidProfile{})
+	require.Equal(t, err, fmt.Errorf("api.access not implemented for non-OCI profiles"))
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
