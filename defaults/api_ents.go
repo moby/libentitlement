@@ -80,10 +80,11 @@ func apiEntitlementEnforce(profile secprofile.Profile, apiToAccess string) (secp
 	}
 
 	apiToAccessFields := strings.Split(apiToAccess, ":")
+	badAccessFormatError := fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
 
 	logrus.Debugf("Fields found for %s: %v", apiToAccess, apiToAccessFields)
 	if len(apiToAccessFields) != 3 {
-		return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
+		return nil, badAccessFormatError
 	}
 
 	apiIDStr := apiToAccessFields[0]
@@ -107,5 +108,5 @@ func apiEntitlementEnforce(profile secprofile.Profile, apiToAccess string) (secp
 		return ociProfile, nil
 	}
 
-	return nil, fmt.Errorf("Wrong API subset and access format, should be \"api-id:subset:[allow|deny]\"")
+	return nil, badAccessFormatError
 }
