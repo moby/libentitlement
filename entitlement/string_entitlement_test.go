@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/moby/libentitlement/secprofile"
+	"github.com/stretchr/testify/require"
 )
 
 // expectedStrEntitlementValue is the value our tests pass to the enforce
@@ -60,5 +61,56 @@ func TestStringEntitlement(t *testing.T) {
 
 	for in, out := range tests {
 		testEntitlement(t, in, out)
+	}
+}
+
+func TestStringEntitlementSetValue(t *testing.T) {
+	type test struct {
+		entitlement Entitlement
+		value       string
+		wantValue   string
+		wantErr     error
+	}
+
+	tests := []test{
+		{
+			entitlement: nil,
+			value:       "",
+			wantValue:   "",
+			wantErr:     fmt.Errorf("Invalid entitlement"),
+		},
+		{
+			entitlement: nil,
+			value:       "test",
+			wantValue:   "",
+			wantErr:     fmt.Errorf("Invalid entitlement"),
+		},
+		{
+			entitlement: NewStringEntitlement("test.foo", nil),
+			value:       "",
+			wantValue:   "",
+			wantErr:     fmt.Errorf("Invalid value for entitlement test.foo"),
+		},
+		{
+			entitlement: NewStringEntitlement("test.foo", nil),
+			value:       "bar",
+			wantValue:   "bar",
+			wantErr:     nil,
+		},
+	}
+
+	for _, tt := range tests {
+		strEnt := (*StringEntitlement)(nil)
+		if tt.entitlement != nil {
+			ok := false
+			strEnt, ok = tt.entitlement.(*StringEntitlement)
+			require.True(t, ok)
+		}
+
+		err := strEnt.SetValue(tt.value)
+		require.Equal(t, tt.wantErr, err)
+		if tt.wantErr == nil && err == nil {
+			require.Equal(t, tt.wantValue, strEnt.value)
+		}
 	}
 }
