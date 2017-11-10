@@ -70,7 +70,7 @@ func IsSwarmAPIControlled(profile secprofile.Profile) (isControlled bool, access
 func apiEntitlementEnforce(profile secprofile.Profile, apiToAccess string) (secprofile.Profile, error) {
 	logrus.Debugf("API entitlement for %s", apiToAccess)
 
-	ociProfile, err := ociProfileConversionCheck(profile, NetworkNoneEntFullID)
+	ociProfile, err := ociProfileConversionCheck(profile, APIEntFullID)
 	if err != nil {
 		return nil, err
 	}
