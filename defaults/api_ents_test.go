@@ -49,12 +49,6 @@ func (p *invalidProfile) GetType() secprofile.ProfileType {
 	return secprofile.ProfileType("invalid-profile")
 }
 
-type nilAPIAccessConfigProfile struct{}
-
-func (p *nilAPIAccessConfigProfile) GetType() secprofile.ProfileType {
-	return secprofile.OCIProfileType
-}
-
 func TestAPIEntitlementEnforceErrors(t *testing.T) {
 	entitlementID := APIEntFullID
 
@@ -87,8 +81,10 @@ func TestAPIEntitlementEnforceErrors(t *testing.T) {
 	_, err = apiEnt.Enforce(&invalidProfile{})
 	require.Equal(t, err, fmt.Errorf("api.access not implemented for non-OCI profiles"))
 
-	_, err = apiEnt.Enforce(&nilAPIAccessConfigProfile{})
-	require.Equal(t, err, fmt.Errorf("api.access: error converting to OCI profile"))
+	ociProfile.APIAccessConfig = nil
+
+	_, err = apiEnt.Enforce(ociProfile)
+	require.Equal(t, err, fmt.Errorf("OCI profile's APIAccess field nil"))
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
