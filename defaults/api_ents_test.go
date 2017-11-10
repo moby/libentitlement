@@ -43,12 +43,16 @@ func TestAPIEntitlementEnforceAllow(t *testing.T) {
 	require.True(t, reflect.DeepEqual(ociProfile.APIAccessConfig.APIRights, refAPIRights))
 }
 
-type invalidProfile struct {
-	foo int
-}
+type invalidProfile struct{}
 
 func (p *invalidProfile) GetType() secprofile.ProfileType {
 	return secprofile.ProfileType("invalid-profile")
+}
+
+type nilAPIAccessConfigProfile struct{}
+
+func (p *nilAPIAccessConfigProfile) GetType() secprofile.ProfileType {
+	return secprofile.OCIProfileType
 }
 
 func TestAPIEntitlementEnforceErrors(t *testing.T) {
@@ -82,6 +86,9 @@ func TestAPIEntitlementEnforceErrors(t *testing.T) {
 
 	_, err = apiEnt.Enforce(&invalidProfile{})
 	require.Equal(t, err, fmt.Errorf("api.access not implemented for non-OCI profiles"))
+
+	_, err = apiEnt.Enforce(&nilAPIAccessConfigProfile{})
+	require.Equal(t, err, fmt.Errorf("api.access: error converting to OCI profile"))
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
