@@ -25,6 +25,9 @@ const (
 
 	// SwarmAPI defines the Moby-Engine Swarm API
 	SwarmAPI = "swarm"
+
+	// Moby-Engine API Version
+	EngineAPIVersion = "v1_35"
 )
 
 var (
@@ -33,7 +36,7 @@ var (
 
 // GetSwarmAPIIdentifier returns the full Swarm API identifier
 func GetSwarmAPIIdentifier() secprofile.APIID {
-	return secprofile.APIID(fmt.Sprintf("%s.%s", EngineAPI, SwarmAPI))
+	return secprofile.APIID(fmt.Sprintf("%s.%s.%s", EngineAPI, EngineAPIVersion, SwarmAPI))
 }
 
 /*IsSwarmAPIControlled checks if Moby Swarm API is controlled and whether it's allowed or not

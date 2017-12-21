@@ -88,7 +88,7 @@ func TestAPIEntitlementEnforceErrors(t *testing.T) {
 }
 
 func TestGetSwarmAPIIdentifier(t *testing.T) {
-	require.Equal(t, GetSwarmAPIIdentifier(), secprofile.APIID("engine.swarm"))
+	require.Equal(t, GetSwarmAPIIdentifier(), secprofile.APIID("engine.v1_35.swarm"))
 }
 
 func TestIsSwarmAPIControlled(t *testing.T) {
