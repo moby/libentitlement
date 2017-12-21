@@ -164,7 +164,6 @@ func securityAdminEntitlementEnforce(profile secprofile.Profile) (secprofile.Pro
 		osdefs.SysQuotactl,
 		osdefs.SysGetpmsg,
 		osdefs.SysPutpmsg,
-
 	}
 	ociProfile.AllowSyscalls(syscallsToAllow...)
 

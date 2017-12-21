@@ -3,10 +3,11 @@ package secprofile
 import (
 	"reflect"
 
-	"github.com/sirupsen/logrus"
 	"github.com/moby/libentitlement/apparmor"
 	"github.com/moby/libentitlement/types"
+
 	"github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/sirupsen/logrus"
 )
 
 // APIID is the API identifier type

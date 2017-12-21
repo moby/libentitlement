@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/moby/libentitlement/parser"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Domain defines the scoping for entitlements, ie Network

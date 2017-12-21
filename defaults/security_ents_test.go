@@ -7,6 +7,7 @@ import (
 	"github.com/moby/libentitlement/secprofile/osdefs"
 	"github.com/moby/libentitlement/testutils"
 	"github.com/moby/libentitlement/types"
+
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
 )

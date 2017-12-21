@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/moby/libentitlement/entitlement"
 	"github.com/moby/libentitlement/secprofile"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (

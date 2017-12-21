@@ -2,10 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // FIXME: refactor shared code between each Parse[..]Entitlement functions
@@ -124,6 +125,5 @@ func ParseStringEntitlement(entitlementFormat string) (domain []string, id, valu
 	}
 
 	// FIXME: should we add constraints on the allowed characters in entitlement parameters and check integrity?
-
 	return
 }
