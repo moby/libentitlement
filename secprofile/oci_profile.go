@@ -3,11 +3,34 @@ package secprofile
 import (
 	"reflect"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/moby/libentitlement/apparmor"
 	"github.com/moby/libentitlement/types"
+
 	"github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/sirupsen/logrus"
 )
+
+// APIID is the API identifier type
+type APIID string
+
+// APISubsetID is the API subset identifier type
+type APISubsetID string
+
+// APIAccess defines whether or not an API access is allowed or not
+type APIAccess string
+
+const (
+	// Allow indicates that an API access is allowed
+	Allow APIAccess = "allow"
+
+	// Deny indicates that an API access is denied
+	Deny APIAccess = "deny"
+)
+
+// APIAccessConfig contains an access rule for each subset of controlled APIs
+type APIAccessConfig struct {
+	APIRights map[APIID]map[APISubsetID]APIAccess
+}
 
 // OCIProfileType is an identifier for an OCI profile
 var OCIProfileType = ProfileType("oci-profile")
@@ -18,17 +41,28 @@ var OCIProfileType = ProfileType("oci-profile")
 // FIXME: Add error handling here if profile or subfields are not allocated */
 // Fixme add api access settings for Engine / Swarm / K8s?
 type OCIProfile struct {
-	OCI           *specs.Spec
-	AppArmorSetup *apparmor.ProfileData
+	OCI             *specs.Spec
+	AppArmorSetup   *apparmor.ProfileData
+	APIAccessConfig *APIAccessConfig
 }
 
 // NewOCIProfile instantiates an OCIProfile object with an OCI specification structure
 func NewOCIProfile(ociSpec *specs.Spec, apparmorProfileName string) *OCIProfile {
+	apiAccessConfig := &APIAccessConfig{make(map[APIID]map[APISubsetID]APIAccess)}
+
 	if apparmorProfileName == "" || apparmorProfileName == "unconfined" {
-		return &OCIProfile{OCI: ociSpec, AppArmorSetup: nil}
+		return &OCIProfile{
+			OCI:             ociSpec,
+			AppArmorSetup:   nil,
+			APIAccessConfig: apiAccessConfig,
+		}
 	}
 
-	return &OCIProfile{OCI: ociSpec, AppArmorSetup: apparmor.NewEmptyProfileData(apparmorProfileName)}
+	return &OCIProfile{
+		OCI:             ociSpec,
+		AppArmorSetup:   apparmor.NewEmptyProfileData(apparmorProfileName),
+		APIAccessConfig: apiAccessConfig,
+	}
 }
 
 // GetType returns the OCI profile type identifier

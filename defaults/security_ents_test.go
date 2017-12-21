@@ -7,6 +7,7 @@ import (
 	"github.com/moby/libentitlement/secprofile/osdefs"
 	"github.com/moby/libentitlement/testutils"
 	"github.com/moby/libentitlement/types"
+
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
 )
@@ -128,12 +129,17 @@ func TestSecurityAdminEntitlementEnforce(t *testing.T) {
 		osdefs.CapMacAdmin, osdefs.CapMacOverride, osdefs.CapDacOverride, osdefs.CapDacReadSearch, osdefs.CapSetpcap, osdefs.CapSetfcap, osdefs.CapSetuid, osdefs.CapSetgid,
 		osdefs.CapSysPtrace, osdefs.CapFsetid, osdefs.CapSysModule, osdefs.CapSyslog, osdefs.CapSysRawio, osdefs.CapSysAdmin, osdefs.CapLinuxImmutable, osdefs.CapSysBoot,
 		osdefs.CapSysNice, osdefs.CapSysPacct, osdefs.CapSysTtyConfig, osdefs.CapSysTime, osdefs.CapWakeAlarm, osdefs.CapAuditRead, osdefs.CapAuditWrite, osdefs.CapAuditControl,
+		osdefs.CapSysResource,
 	}
 	require.True(t, testutils.OCICapsMatchRefWithConstraints(*newOCIProfile.OCI.Process.Capabilities, capsToAdd, nil))
 
 	syscallsToAllow := []types.Syscall{
-		osdefs.SysPtrace, osdefs.SysArchPrctl, osdefs.SysPersonality, osdefs.SysSetuid, osdefs.SysSetgid, osdefs.SysPrctl, osdefs.SysMadvise, osdefs.SysMount, osdefs.SysInitModule,
-		osdefs.SysFinitModule, osdefs.SysSetns, osdefs.SysClone, osdefs.SysUnshare,
+		osdefs.SysPtrace, osdefs.SysArchPrctl, osdefs.SysPersonality, osdefs.SysSetuid, osdefs.SysSetgid, osdefs.SysPrctl,
+		osdefs.SysMadvise, osdefs.SysMount, osdefs.SysUmount2, osdefs.SysInitModule, osdefs.SysFinitModule,
+		osdefs.SysSetns, osdefs.SysClone, osdefs.SysUnshare, osdefs.SysKeyctl, osdefs.SysPivotRoot, osdefs.SysSethostname,
+		osdefs.SysSetdomainname, osdefs.SysIopl, osdefs.SysIoperm, osdefs.SysCreateModule, osdefs.SysInitModule,
+		osdefs.SysDeleteModule, osdefs.SysGetKernelSyms, osdefs.SysQueryModule, osdefs.SysQuotactl, osdefs.SysGetpmsg,
+		osdefs.SysPutpmsg,
 	}
 	require.True(t, testutils.AreSyscallsAllowedBySeccomp(*newOCIProfile.OCI.Linux.Seccomp, syscallsToAllow))
 

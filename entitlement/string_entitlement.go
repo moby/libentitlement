@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/moby/libentitlement/parser"
 	secprofile "github.com/moby/libentitlement/secprofile"
@@ -19,18 +19,18 @@ type StringEntitlement struct {
 	domain          []string
 	id              string
 	value           string
-	enforceCallback StringEntitlementEnforceCallback
+	EnforceCallback StringEntitlementEnforceCallback
 }
 
 // NewStringEntitlement instantiates a new string Entitlement
 func NewStringEntitlement(fullName string, callback StringEntitlementEnforceCallback) Entitlement {
 	domain, id, value, err := parser.ParseStringEntitlement(fullName)
 	if err != nil {
-		logrus.Errorf("Could not create string entitlement for %v\n", fullName)
+		logrus.Errorf("Could not create string entitlement for %v - %v", fullName, err)
 		return nil
 	}
 
-	return &StringEntitlement{domain: domain, id: id, value: value, enforceCallback: callback}
+	return &StringEntitlement{domain: domain, id: id, value: value, EnforceCallback: callback}
 }
 
 // Domain returns the entitlement's domain name
@@ -68,6 +68,23 @@ func (e *StringEntitlement) Value() (string, error) {
 	return e.value, nil
 }
 
+// SetValue sets the entitlement's value.
+func (e *StringEntitlement) SetValue(value string) error {
+	if e == nil {
+		return fmt.Errorf("Invalid entitlement")
+	}
+
+	if value == "" {
+		id, _ := e.Identifier()
+		domain, _ := e.Domain()
+		return fmt.Errorf("Invalid value for entitlement %v.%v", domain, id)
+	}
+
+	e.value = value
+
+	return nil
+}
+
 // Enforce calls the enforcement callback which applies the constraints on the security profile
 // based on the entitlement value
 func (e *StringEntitlement) Enforce(profile secprofile.Profile) (secprofile.Profile, error) {
@@ -76,13 +93,13 @@ func (e *StringEntitlement) Enforce(profile secprofile.Profile) (secprofile.Prof
 		return nil, err
 	}
 
-	if e.enforceCallback == nil {
+	if e.EnforceCallback == nil {
 		id, _ := e.Identifier()
 		domain, _ := e.Domain()
 		return nil, fmt.Errorf("Invalid enforcement callback for entitlement %v.%v", domain, id)
 	}
 
-	newProfile, err := e.enforceCallback(profile, value)
+	newProfile, err := e.EnforceCallback(profile, value)
 	if err != nil {
 		return nil, err
 	}
