@@ -170,6 +170,7 @@ func AreSeccompSyscallsWithArgsAllowed(seccompProfile specs.LinuxSeccomp, syscal
 }
 
 // AreSyscallsAllowedBySeccomp checks that the provided syscalls are whitelisted by the seccomp profile
+// FIXME(nass) should test exact match (whitelisting + blacklisting)
 func AreSyscallsAllowedBySeccomp(seccompProfile specs.LinuxSeccomp, syscallNames []types.Syscall) bool {
 	for _, syscallName := range syscallNames {
 		if !isSyscallWithArgsAllowedBySeccomp(seccompProfile, syscallName, []specs.LinuxSeccompArg{}) {
