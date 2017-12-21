@@ -3,7 +3,7 @@ package secprofile
 import (
 	"reflect"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/moby/libentitlement/apparmor"
 	"github.com/moby/libentitlement/types"
 	"github.com/opencontainers/runtime-spec/specs-go"

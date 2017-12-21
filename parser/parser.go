@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
 	"strings"
