@@ -12,7 +12,7 @@ import (
 
 const (
 	// APIEntFullID is the API entitlement identifier; the value format is: "api.access:api-id:subset:[allow|deny]"
-	// ex: "api.access:engine.swarm:all:allow"
+	// ex: "api.access:engine.v1_35.swarm:all:allow"
 	APIEntFullID = "api.access"
 
 	// APIFullControl specifies access control for the whole api
