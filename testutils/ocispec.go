@@ -22,7 +22,7 @@ func capListContains(capList []string, capability types.Capability) bool {
 // TestSpec is a test OCI struct with a default Seccomp profile
 func TestSpec() *specs.Spec {
 	s := &specs.Spec{
-		Process: specs.Process{
+		Process: &specs.Process{
 			Capabilities: &specs.LinuxCapabilities{
 				Bounding:    []string{},
 				Effective:   []string{},
@@ -41,8 +41,8 @@ func TestSpec() *specs.Spec {
 				Memory:  &specs.WindowsMemoryResources{},
 				CPU:     &specs.WindowsCPUResources{},
 				Storage: &specs.WindowsStorageResources{},
-				Network: &specs.WindowsNetworkResources{},
 			},
+			Network: &specs.WindowsNetwork{},
 		},
 	}
 
